@@ -1,17 +1,39 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import {BrowserRouter as Router, Switch, Route, Redirect} from 'react-router-dom'
+import ReactFontLoader from 'react-font-loader'
+
+import { SecuredApp, SecuredRoute } from './context/auth'
+import Login from './pages/login'
+import Register from './pages/registry'
+import Movies from './pages/movies'
+
+import './styles.css'
+import Movie from "./pages/movie";
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+    <React.StrictMode>
+        <SecuredApp>
+            <ReactFontLoader url = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap' />
+            <ReactFontLoader url = 'https://fonts.googleapis.com/css2?family=Modak&display=swap' />
+            <Router>
+                <Switch>
+                    <Route path = '/login'>
+                        <Login />
+                    </Route>
+                    <Route path = '/register'>
+                        <Register />
+                    </Route>
+                    <SecuredRoute path = { `/movies/:id` } >
+                        <Movie />
+                    </SecuredRoute>
+                    <SecuredRoute path = '/movies'>
+                        <Movies />
+                    </SecuredRoute>
+                    <Redirect to = '/movies' />
+                </Switch>
+            </Router>
+        </SecuredApp>
+    </React.StrictMode>,
+    document.getElementById('root')
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
