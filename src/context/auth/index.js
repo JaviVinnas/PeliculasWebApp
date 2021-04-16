@@ -2,20 +2,26 @@ import React, {useContext, useState} from 'react'
 import {Redirect, Route} from 'react-router-dom'
 import API from '../../api'
 
-const AuthContext = React.createContext({
+const AuthenticationContext = React.createContext({
     isAuthenticated: false,
     errors: false,
     login: () => {},
-    logout: () => {}
+    logout: () => {},
+    reset: () => {}
 })
 const client = API.instance()
 
-export function SecuredApp({children}) {
+function SecuredApp({children}) {
 
     const [isAuthenticated, setIsAuthenticated] = useState(JSON.parse(localStorage.getItem('authenticated') || false))
     const [errors, setErrors] = useState(false)
-    const login = async (user, pass) => {
 
+    const reset = async () => {
+        localStorage.setItem('authenticated', JSON.stringify(false))
+        setErrors(false)
+        setIsAuthenticated(false)
+    }
+    const login = async (user, pass) => {
         const loginSuccessful = await client.login(user, pass)
         localStorage.setItem('authenticated', JSON.stringify(loginSuccessful))
         setIsAuthenticated(loginSuccessful)
@@ -23,23 +29,22 @@ export function SecuredApp({children}) {
     }
     const logout = async () => {
         await client.logout()
-        localStorage.setItem('authenticated', JSON.stringify(false))
-        setIsAuthenticated(false)
-        setErrors(false)
+        await reset()
     }
-    const context = { isAuthenticated, login, logout, errors }
 
-    return <AuthContext.Provider value = { context } >
+    const context = { isAuthenticated, login, logout, errors, reset }
+
+    return <AuthenticationContext.Provider value = { context } >
         { children }
-    </AuthContext.Provider>
+    </AuthenticationContext.Provider>
 
 }
 
-export function SecuredRoute({children, ...props}) {
+function SecuredRoute({children, ...props}) {
 
-    const {isAuthenticated} = useContext(AuthContext)
+    const {isAuthenticated} = useContext(AuthenticationContext)
     return isAuthenticated ? <Route {...props}>{children}</Route> : <Redirect to = '/login' />
 
 }
 
-export default AuthContext
+export { AuthenticationContext, SecuredApp, SecuredRoute }
