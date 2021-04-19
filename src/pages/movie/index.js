@@ -101,7 +101,7 @@ function View({ movie }) {
         <div style = {{
                 aspectRatio: '16/9'
              }}
-             className = 'flex-1 ml-8 mt-8 bg-black flex items-center justify-center z-20'>
+             className = 'flex-1 ml-8 mt-8 bg-pattern-2 flex items-center justify-center z-20'>
             <Trailer movie = { movie } />
         </div>
     </div>
@@ -285,5 +285,5 @@ function Trailer({ movie, ...props }) {
     if(trailer)
         return <ReactPlayer url = { trailer.url } { ...props } />
     else
-        return <span className = 'text-white text-lg font-semibold'>No se han encontrado trailers!</span>
+        return <span className = 'text-white text-xl font-semibold p-8 backdrop-filter backdrop-blur bg-red-500 bg-opacity-30'>No se han encontrado trailers!</span>
 }

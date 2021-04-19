@@ -104,4 +104,12 @@ export default class API {
             resolve(true)
         })
     }
+
+    async createUser(user) {
+        console.log(user)
+    }
+
+    async updateUser(id, user) {
+        console.log(user)
+    }
 }

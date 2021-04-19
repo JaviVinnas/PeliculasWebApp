@@ -6,7 +6,7 @@ import { Shell, Button } from '../../components'
 import { ReactComponent as Image } from './not-found.svg'
 
 export default function NotFound() {
-    const [timeout, dispatch] = useReducer(
+    const [ timeout, dispatch ] = useReducer(
         (state, action) => {
             switch(action) {
                 case 'tick' : return state - 1

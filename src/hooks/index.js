@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+
 import API from '../api'
 
 export function useMovies(query = {}) {
@@ -28,17 +29,29 @@ export function useMovie(id = '') {
 
 export function useUser(id = null) {
     const [data, setData] = useState([])
-    const user = id === null ? localStorage.getItem('user') : id
+    const userId = id === null ? localStorage.getItem('user') : id
 
     useEffect(() => {
         API.instance()
-            .findUser(user)
+            .findUser(userId)
             .then(user => {
                 setData(user)
             })
-    }, [user])
+    }, [userId])
 
-    return data
+    const create = user => API.instance()
+            .createUser(user)
+            .then(user => setData(user))
+
+    const update = user => API.instance()
+            .updateUser(id, user)
+            .then(user => setData(user))
+
+    return {
+        user: data,
+        create,
+        update
+    }
 }
 
 export function useComments(query = {}){
@@ -56,7 +69,7 @@ export function useComments(query = {}){
             .createComment(comment)
             .then( () => {
                 API.instance()
-                    .findCommentsForMovie(query)
+                    .findComments(query)
                     .then(setData)
             })
     }
