@@ -9,11 +9,10 @@ import {
     SearchOutline as Search,
     DocumentAddOutline as New } from '@graywolfai/react-heroicons'
 import { Menu, Transition } from '@headlessui/react'
+import { useDebouncedCallback as useDebounce } from 'use-debounce'
 
 import { AuthenticationContext } from '../../context'
-
 import { Logo, Button, Input, MovieList } from '../'
-
 import { useUser } from '../../hooks'
 
 function tryParse(query) {
@@ -36,15 +35,14 @@ function tryParse(query) {
 export function Shell({children, className = ''}) {
     const [ query, setQuery ] = useState('')
     const [ focused, setFocused ] = useState(false)
+    const debouncedSetQuery = useDebounce(setQuery, 500)
 
+    const form = () => document?.getElementById("searchForm")
+    const input = () => form()?.querySelector("input[name=search]")
     const close = () => {
         blur()
         setQuery('')
     }
-
-    const form = () => document?.getElementById("searchForm")
-    const input = () => form()?.querySelector("input[name=search]")
-
     const blur = () => {
         setFocused(false)
         form()?.querySelectorAll("*")?.forEach(elem => elem?.blur())
@@ -71,9 +69,8 @@ export function Shell({children, className = ''}) {
                        labelClassName = 'text-gray-400 rounded-full focus-within:text-yellow-600'
                        className = 'rounded-full bg-white shadow-inner placeholder-gray-400 font-medium'
                        before = { Search }
-                       value = { query }
                        onFocus = { focus }
-                       onChange = { evt => setQuery(evt.target.value?.trimStart()) }
+                       onChange = { evt => debouncedSetQuery(evt.target.value?.trimStart()) }
                        onKeyUp = { evt => evt.key === 'Escape' && close() }
                 />
                 <button className = {`absolute right-4 top-3 bottom-3 flex items-center px-2 pt-px 
@@ -104,7 +101,7 @@ export function Shell({children, className = ''}) {
                              ${focused ? 'translate-y-0' : '-translate-y-full'}`}
                onClick = { evt => evt.target === evt.currentTarget && blur() }
         >
-            <div className = 'w-screen bg-white'>
+            <div className = 'w-full bg-white'>
                 <MovieList className = 'bg-white pt-8' itemClassName = 'hover:translate-y-4' query = { { filter: tryParse(query) } } />
             </div>
             <footer className = {`w-full flex bg-white justify-center p-2 cursor-pointer transition transform hover:-translate-y-2` }>
