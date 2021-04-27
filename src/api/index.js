@@ -6,40 +6,47 @@ export default class API {
     #token = sessionStorage.getItem('token') || null
 
     static instance() {
-        if(__instance == null)
+        if (__instance == null)
             __instance = new API()
 
         return __instance
     }
 
-    async login(email, pass) {
+    async login(email, password) {
         // TODO fetch from API and if successful, store token from response headers
-        const user = DATA.users.find(u => u.email === email)
 
-        if(user.password === pass) {
-            localStorage.setItem('user', email)
-            localStorage.setItem('token', 'TEST TOKEN')
-            this.#token = 'TEST TOKEN'
-            return true
+
+        const result = await fetch("api/login", {
+            method: 'post',
+            body: JSON.stringify({email, password})
+        }).catch(ex => console.log(`Error al llamar a la API en el login ${ex}`))
+
+        if(result.status === 200){
+            localStorage.setItem('user',email);
+            this.#token = result.headers.get("Authentication");
+            localStorage.setItem('token', this.#token);
+            return true;
         } else {
-            return false
+            return false;
         }
     }
+
     async logout() {
         this.#token = null
         localStorage.clear()
 
         return true
     }
+
     async findMovies(
         {
-            filter: { genre = '', title = '', status = '' } = { genre : '', title : '', status : '' },
+            filter: {genre = '', title = '', status = ''} = {genre: '', title: '', status: ''},
             sort,
-            pagination: {page = 0, size = 7} = { page: 0, size: 7 }
+            pagination: {page = 0, size = 7} = {page: 0, size: 7}
         } = {
-            filter: { genre : '', title : '', status : '' },
+            filter: {genre: '', title: '', status: ''},
             sort: {},
-            pagination: { page: 0, size: 7 }
+            pagination: {page: 0, size: 7}
         }
     ) {
         return new Promise(resolve => {
@@ -59,9 +66,11 @@ export default class API {
             resolve(data)
         })
     }
+
     async findMovie(id) {
         return DATA.movies.find(movie => movie.id === id)
     }
+
     async findUser(id) {
         return new Promise(resolve => {
             const user = DATA.users.find(user => user.email === id)
@@ -72,13 +81,13 @@ export default class API {
 
     async findComments(
         {
-            filter: { movie = '', user = '' } = { movie: '', user: '' },
+            filter: {movie = '', user = ''} = {movie: '', user: ''},
             sort,
-            pagination: {page = 0, size = 10} = { page: 0, size: 10}
+            pagination: {page = 0, size = 10} = {page: 0, size: 10}
         } = {
-            filter: { movie: '', user: '' },
+            filter: {movie: '', user: ''},
             sort: {},
-            pagination: { page: 0, size: 10}
+            pagination: {page: 0, size: 10}
         }
     ) {
         return new Promise(resolve => {

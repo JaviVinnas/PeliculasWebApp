@@ -2,13 +2,13 @@
   <configuration default="false" name="launch" type="js.build_tools.npm">
     <package-json value="$PROJECT_DIR$/package.json" />
     <command value="start" />
-    <node-interpreter value="project" />
+    <node-interpreter value="wsl://Ubuntu-20.04-HDD@/root/.nvm/versions/node/v15.14.0/bin/node" />
     <envs />
     <method v="2">
       <option name="NpmBeforeRunTask" enabled="true">
         <package-json value="$PROJECT_DIR$/package.json" />
         <command value="install" />
-        <node-interpreter value="project" />
+        <node-interpreter value="wsl://Ubuntu-20.04-HDD@/root/.nvm/versions/node/v15.14.0/bin/node" />
         <envs />
       </option>
     </method>
