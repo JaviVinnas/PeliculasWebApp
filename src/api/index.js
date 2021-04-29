@@ -13,9 +13,6 @@ export default class API {
     }
 
     async login(email, password) {
-        // TODO fetch from API and if successful, store token from response headers
-
-
         const result = await fetch("api/login", {
             method: 'post',
             body: JSON.stringify({email, password})
@@ -34,7 +31,6 @@ export default class API {
     async logout() {
         this.#token = null
         localStorage.clear()
-
         return true
     }
 
@@ -49,6 +45,25 @@ export default class API {
             pagination: {page: 0, size: 7}
         }
     ) {
+        let url = 'api/movies/search?'
+        //los filtros
+        if(genre !== ''){
+            url += 'genre=' + genre
+        }
+        if(title !== ''){
+            url += 'title=' + title
+        }
+        if(status !== ''){
+            url += 'status=' + status
+        }
+
+
+
+
+
+
+
+
         return new Promise(resolve => {
             const filtered = DATA.movies
                 ?.filter(movie => movie.title.toLowerCase().includes(title.toLowerCase() || ''))
