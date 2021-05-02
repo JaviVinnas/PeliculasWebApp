@@ -12,14 +12,20 @@ export default class API {
         return __instance
     }
 
+    /**
+     * Función que hace el loguin del usuario en la API
+     * @param email el identificador unívoco de cada usuario
+     * @param password su contraseña
+     * @returns {Promise<boolean>} si las cosas fuero bien o mal
+     */
     async login(email, password) {
         const result = await fetch("api/login", {
             method: 'post',
             body: JSON.stringify({email, password})
-        }).catch(ex => console.log(`Error al llamar a la API en el login ${ex}`))
+        }).catch(ex => console.error(`Error al llamar a la API en el login ${ex}`))
 
-        if(result.status === 200){
-            localStorage.setItem('user',email);
+        if (result.status === 200) {
+            localStorage.setItem('user', email);
             this.#token = result.headers.get("Authentication");
             localStorage.setItem('token', this.#token);
             return true;
@@ -45,23 +51,40 @@ export default class API {
             pagination: {page: 0, size: 7}
         }
     ) {
-        let url = 'api/movies/search?'
-        //los filtros
-        if(genre !== ''){
-            url += 'genre=' + genre
-        }
-        if(title !== ''){
-            url += 'title=' + title
-        }
-        if(status !== ''){
-            url += 'status=' + status
+
+        const object = {
+            genre,
+            title,
+            status,
+            sort,
+            page,
+            size
         }
 
+        const params = Object.fromEntries(Object.entries(object)
+                //quitamos los parámetros que sean "" o {}
+                .filter(([key, value]) => value !== '' || value !== {} || value !== undefined )
+                //transformamos el sort de tipo {title: 'ASC'} a 'title:asc'
+                .map(([key, value]) => key === 'sort' ? [key, Object.keys(value)[0] + ':' + Object.values(value)[0].toLowerCase()] : [key, value])
+        );
 
+        console.log( object , params)
 
+        const rawResult = await fetch('/api/movies?' + new URLSearchParams(params), {
+            method: 'GET',
+            headers: {'Authorization': localStorage.getItem('token')}
+        }).catch(ex => console.error(`Error al buscar todas las películas: ${ex}`))
+        //si lo obtenemos
+        if(rawResult.status >= 200 && rawResult.status < 300){
+            const content = await rawResult.json()
+            return {
+                pagination: {
+                    //hasNext: size * page + size < filtered.length,
+                    hasPrevious: page > 0
+                },
 
-
-
+            }
+        }
 
 
         return new Promise(resolve => {
