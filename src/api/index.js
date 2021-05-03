@@ -53,37 +53,51 @@ export default class API {
     ) {
 
 
-        let params = {page,size}
+        let params = {page, size}
 
-        if(genre !== ''){
+        if (genre !== '') {
             params = {...params, genre}
         }
 
-        if(title !== ''){
+        if (title !== '') {
             params = {...params, title}
         }
-        if(status !== ''){
+        if (status !== '') {
             params = {...params, status}
         }
-        if(sort !== {}){
-            params = {...params,sort: Object.keys(sort)[0] + ':' + Object.values(sort)[0].toLowerCase()}
-        }
 
-        console.log(params)
+        try {
+            if (sort && Object.keys(sort).length === 0 && sort.constructor === Object) {
+                params = {...params, sort: Object.keys(sort)[0] + ':' + Object.values(sort)[0].toLowerCase()}
+            }
+        } catch (ignore){}
 
         const rawResult = await fetch('/api/movies?' + new URLSearchParams(params), {
             method: 'GET',
             headers: {'Authorization': localStorage.getItem('token')}
-        }).catch(ex => console.error(`Error al buscar todas las películas: ${ex}`))
+        }).catch(ex => console.error(`Error al buscar películas: ${ex}`))
 
-        if(rawResult.status >= 200 && rawResult.status < 300){ //si lo obtenemos
-            const content = await rawResult.json()
-            console.log(content)
-        }else if(rawResult.status === 404){ //si la búsqueda no obtuvo ningún resultado
+        const bodyContent = await rawResult.json()
 
+        let finalContent = {pagination: {hasNext: false, hasPrevious: false}, content: []}
+
+        if (rawResult.status >= 200 && rawResult.status < 300) { // salió bien
+            //construimos el objeto resultado
+            finalContent.pagination.hasNext = !bodyContent.last
+            finalContent.pagination.hasPrevious = !bodyContent.first
+            finalContent.content = bodyContent.content
+            //informamos del resultado
+            console.log("buscar películas correcto", {params,content: bodyContent, finalContent})
+            //lo devolvemos
+            return finalContent;
+
+        }else { //hubo un error en la búsqueda de películas
+            //informamos del resultado
+            console.error("Error a la hora de buscar películas en la API con los parámetros ", params, ". Descripción de error: ", bodyContent )
+            return finalContent;
         }
 
-
+/*
         return new Promise(resolve => {
             const filtered = DATA.movies
                 ?.filter(movie => movie.title.toLowerCase().includes(title.toLowerCase() || ''))
@@ -100,6 +114,10 @@ export default class API {
 
             resolve(data)
         })
+
+ */
+
+
     }
 
     async findMovie(id) {
