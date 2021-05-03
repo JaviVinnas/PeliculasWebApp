@@ -43,7 +43,7 @@ export default class API {
     async findMovies(
         {
             filter: {genre = '', title = '', status = ''} = {genre: '', title: '', status: ''},
-            sort,
+            sort = {},
             pagination: {page = 0, size = 7} = {page: 0, size: 7}
         } = {
             filter: {genre: '', title: '', status: ''},
@@ -52,38 +52,35 @@ export default class API {
         }
     ) {
 
-        const object = {
-            genre,
-            title,
-            status,
-            sort,
-            page,
-            size
+
+        let params = {page,size}
+
+        if(genre !== ''){
+            params = {...params, genre}
         }
 
-        const params = Object.fromEntries(Object.entries(object)
-                //quitamos los parámetros que sean "" o {}
-                .filter(([key, value]) => value !== '' || value !== {} || value !== undefined )
-                //transformamos el sort de tipo {title: 'ASC'} a 'title:asc'
-                .map(([key, value]) => key === 'sort' ? [key, Object.keys(value)[0] + ':' + Object.values(value)[0].toLowerCase()] : [key, value])
-        );
+        if(title !== ''){
+            params = {...params, title}
+        }
+        if(status !== ''){
+            params = {...params, status}
+        }
+        if(sort !== {}){
+            params = {...params,sort: Object.keys(sort)[0] + ':' + Object.values(sort)[0].toLowerCase()}
+        }
 
-        console.log( object , params)
+        console.log(params)
 
         const rawResult = await fetch('/api/movies?' + new URLSearchParams(params), {
             method: 'GET',
             headers: {'Authorization': localStorage.getItem('token')}
         }).catch(ex => console.error(`Error al buscar todas las películas: ${ex}`))
-        //si lo obtenemos
-        if(rawResult.status >= 200 && rawResult.status < 300){
-            const content = await rawResult.json()
-            return {
-                pagination: {
-                    //hasNext: size * page + size < filtered.length,
-                    hasPrevious: page > 0
-                },
 
-            }
+        if(rawResult.status >= 200 && rawResult.status < 300){ //si lo obtenemos
+            const content = await rawResult.json()
+            console.log(content)
+        }else if(rawResult.status === 404){ //si la búsqueda no obtuvo ningún resultado
+
         }
 
 
