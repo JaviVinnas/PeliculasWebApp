@@ -201,11 +201,9 @@ export default class API {
         }
     ) {
 
-        if (movie !== '' && user !== '') throw new Error(`No se puede especificar un usuario y una película en la búsqueda de comentarios simultáneamente (${movie} y ${user})`)
-        if (movie === '' && user === '') {
-            console.error(`Se tiene que especificar al menos un usuario o una película en la búsqueda de comentarios`, arguments[0])
-            throw new Error(`Se tiene que especificar al menos un usuario o una película en la búsqueda de comentarios ${arguments}`)
-        }
+        let finalContent = {pagination: {hasNext: false, hasPrevious: false}, content: []}
+
+        if(movie === user) return finalContent
 
         const url = `../api/${movie !== '' ? `movies/${movie}` : `users/${user}`}/assessments`
 
@@ -225,7 +223,7 @@ export default class API {
 
         const result = await rawResult.json()
 
-        let finalContent = {pagination: {hasNext: false, hasPrevious: false}, content: []}
+
 
         if (rawResult.status === 200) { // salió bien
             //construimos el objeto resultado
