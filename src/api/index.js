@@ -265,7 +265,7 @@ export default class API {
         if (rawResult.status === 201) {
             const bodyContent = await rawResult.json();
             console.log('Creación de comentarios correcta. Argumento ->', comment, '. Resultado -> ', bodyContent)
-            return rawResult.json()
+            return bodyContent
         } else {
             console.error('Creación de comentarios errónea. Argumento ->', comment, '. Resultado -> ', rawResult)
             comment.rating = 0
@@ -274,11 +274,74 @@ export default class API {
         }
     }
 
+    /**
+     * @typedef Birthday
+     * @property {Number} day - día del año
+     * @property {Number} month - mes del año
+     * @property {Number} year - año
+     */
+
+    /**
+     * @typedef User - representación del usuario en el sistema
+     * @property {String} email - el email del usuario identificador
+     * @property {String} name - el nombre del usuario
+     * @property {String} country - el pais del usuario
+     * @property {String} picture - la foto de perfil del usuario
+     * @property {Birthday} birthday - el cumpleaños del usuario
+     * @property {String} password - la contraseña del usuario
+     * @property {Array.<String>} roles - los roles que tiene el usuario en el sistema
+     *
+     */
+
+    /**
+     * Crea un objeto usuario pasado por argumentos
+     * @param {User} user - el usuario que se desee crear
+     * @returns {Promise<User>} - la respuesta que da la api a que se introduzaca un nuevo usuario
+     */
     async createUser(user) {
-        console.log(user)
+        //preparamos la consulta
+
+        const rawResult = await fetch('../api/users', {
+            method: 'POST',
+            headers: {'Authorization': localStorage.getItem('token')},
+            body: JSON.stringify(user)
+        })
+
+        if(rawResult.status === 201){ //si las cosas fueron bien
+            const bodyContent = await rawResult.json();
+            console.log('Creación del usuario correcta. Argumento ->', user, '. Resultado -> ', bodyContent)
+            return bodyContent
+        } else {
+            console.error('Creación del usuario errónea. Argumento ->', user, '. Resultado -> ', rawResult)
+            user.email = 'ERROR'
+            return user
+        }
     }
 
+    /**
+     * Modifica al propio usuario de la app ??
+     * @param {String} id - el identificador del usuario
+     * @param {User} user - el objeto usuario actualizado
+     * @returns {Promise<User>} - el objeto usuario modificado que devuelva la api
+     */
     async updateUser(id, user) {
-        console.log(user)
+        user.email = id
+
+        const rawResult = await fetch('../api/users', {
+            method: 'PUT',
+            headers: {'Authorization': localStorage.getItem('token')},
+            body: JSON.stringify(user)
+        })
+
+        if(rawResult.status === 201){ //si las cosas fueron bien
+            const bodyContent = await rawResult.json();
+            console.log('Modificación del usuario correcta. Argumento ->', user, '. Resultado -> ', bodyContent)
+            return bodyContent
+        } else {
+            console.error('Modificación del usuario errónea. Argumento ->', user, '. Resultado -> ', rawResult)
+            user.email = 'ERROR'
+            return user
+        }
+
     }
 }
