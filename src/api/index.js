@@ -262,13 +262,12 @@ export default class API {
             body: JSON.stringify(comment)
         }).catch(ex => console.error(`Error al buscar películas: ${ex}`))
 
-        const bodyContent = await rawResult.json();
-
         if (rawResult.status === 201) {
+            const bodyContent = await rawResult.json();
             console.log('Creación de comentarios correcta. Argumento ->', comment, '. Resultado -> ', bodyContent)
             return rawResult.json()
         } else {
-            console.error('Creación de comentarios errónea. Argumento ->', comment, '. Resultado -> ', bodyContent)
+            console.error('Creación de comentarios errónea. Argumento ->', comment, '. Resultado -> ', rawResult)
             comment.rating = 0
             comment.comment = 'Error al crear comentario'
             return comment
