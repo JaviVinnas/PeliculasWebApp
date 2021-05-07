@@ -1,4 +1,4 @@
-import DATA from './data'
+
 
 let __instance = null
 
@@ -182,8 +182,8 @@ export default class API {
 
     /**
      * Obtiene una lista con comentarios según los criterios que se le pongan
-     * @param {String} [movie=''] el título de la película de la que se quieren sacar comentarios
-     * @param {String} [user=''] el usuario al cual van a pertenecer todos los comentarios buscados
+     * @param {String} [movie=''] - el título de la película de la que se quieren sacar comentarios
+     * @param {String} [user='']  - el usuario al cual van a pertenecer todos los comentarios buscados
      * @param {Object.<String,'asc'|'desc'>} [sort={}] - los criterios de ordenación de la búsqueda
      * @param {Number} [page=0] - la página que se desee obtener
      * @param {Number} [size=10] - el número de elementos que constendrá la página
@@ -203,7 +203,7 @@ export default class API {
 
         let finalContent = {pagination: {hasNext: false, hasPrevious: false}, content: []}
 
-        if(movie === user) return finalContent
+        if (movie === user) return finalContent
 
         const url = `../api/${movie !== '' ? `movies/${movie}` : `users/${user}`}/assessments`
 
@@ -224,7 +224,6 @@ export default class API {
         const result = await rawResult.json()
 
 
-
         if (rawResult.status === 200) { // salió bien
             //construimos el objeto resultado
             finalContent.pagination.hasNext = !result.last
@@ -242,14 +241,38 @@ export default class API {
         }
     }
 
+    /**
+     * Crea un comentario en la aplicación
+     * @param {Object} comment - el comentario a crear
+     * @param {Number} comment.rating - la puntuación de la película
+     * @param {String} comment.comment - crítica de la película
+     * @param {Object} comment.movie - objeto película que se comenta
+     * @param {String} comment.movie.id - identificador de la película
+     * @param {Object} comment.user - objeto usuario que se enviará
+     * @param {String} comment.user.email - email del usuario (su identificador)
+     * @returns {Promise<{rating: Number, comment: String, movie: {id: String}, user: {email: String}}>}
+     */
     async createComment(comment) {
 
+        comment.user.email = localStorage.getItem('user')
 
-        return new Promise(resolve => {
-            DATA.comments.unshift(comment)
+        const rawResult = await fetch(`../api/assessments`, {
+            method: 'POST',
+            headers: {'Authorization': localStorage.getItem('token')},
+            body: JSON.stringify(comment)
+        }).catch(ex => console.error(`Error al buscar películas: ${ex}`))
 
-            resolve(true)
-        })
+        const bodyContent = await rawResult.json();
+
+        if (rawResult.status === 201) {
+            console.log('Creación de comentarios correcta. Argumento ->', comment, '. Resultado -> ', bodyContent)
+            return rawResult.json()
+        } else {
+            console.error('Creación de comentarios errónea. Argumento ->', comment, '. Resultado -> ', bodyContent)
+            comment.rating = 0
+            comment.comment = 'Error al crear comentario'
+            return comment
+        }
     }
 
     async createUser(user) {
