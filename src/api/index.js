@@ -1,3 +1,130 @@
+//definimos los tipos de datos de la API
+
+/**
+ * @typedef ApiDate - reperesentación de una fecha en la API
+ * @property {Number} day - día del año
+ * @property {Number} month - mes del año
+ * @property {Number} year - año
+ */
+
+/**
+ * @typedef ApiUser - representación del usuario en la API
+ * @property {String} email - el email del usuario identificador
+ * @property {String} name - el nombre del usuario
+ * @property {String} country - el pais del usuario
+ * @property {String} picture - la foto de perfil del usuario
+ * @property {Date} birthday - el cumpleaños del usuario
+ * @property {ApiDate} password - la contraseña del usuario
+ * @property {Array.<String>} roles - los roles que tiene el usuario en el sistema
+ *
+ */
+
+/**
+ * @typedef ApiCrew - representación de los involucrados en la película en la API
+ * @property {String} id - identificador de la persona
+ * @property {String} name - nombre de la persona
+ * @property {String} country - país de origen de la persona
+ * @property {String} picture - foto de la persona
+ * @property {String} biography - biografía de la persona
+ * @property {String} biography - biografía de la persona
+ * @property {ApiDate} birthday - fecha de nacimiento la persona
+ * @property {ApiDate} deathDay - fecha de fallecimiento la persona
+ * @property {String} job - ocupación de la persona
+ */
+
+/**
+ * @typedef ApiCast - representación de los involucrados en la película en la API
+ * @property {String} id - identificador de la persona
+ * @property {String} name - nombre de la persona
+ * @property {String} country - país de origen de la persona
+ * @property {String} picture - foto de la persona
+ * @property {String} biography - biografía de la persona
+ * @property {String} biography - biografía de la persona
+ * @property {ApiDate} birthday - fecha de nacimiento la persona
+ * @property {ApiDate} deathDay - fecha de fallecimiento la persona
+ * @property {String} character - personaje que representan en la película
+ */
+
+/**
+ * @typedef ApiProducer - representación de una productora cinematográfica en la API
+ * @property {String} name - nombre de la productora
+ * @property {String} logo - logo de la productora
+ * @property {String} country - país de origen de la productora
+ */
+
+/**
+ * @typedef ApiResource - representación de un recurso en la película en la API
+ * @param {String} URL - ruta al recurso
+ * @param {
+ * 'POSTER',
+ * 'BACKDROP',
+ * 'TRAILER',
+ * 'NETFLIX',
+ * 'AMAZON_PRIME',
+ * 'DISNEY_PLUS',
+ * 'ITUNES',
+ * 'HBO',
+ * 'YOUTUBE',
+ * 'GOOGLE_PLAY',
+ * 'TORRENT'
+ * } type - tipo de recurso al que nos referimos
+ */
+
+/**
+ * @typedef ApiCollection - representación de colecciones de recursos en la API
+ * @param {String} name - nombre de la colección
+ * @param {Array.<ApiResource>} resources - los recursos de la colección
+ */
+
+/**
+ * @typedef ApiFilm - representación de una película en la api
+ * @property {String} id - el identificador de la película
+ * @property {String} title - el título de la película
+ * @property {String} overview - sinposis de la película
+ * @property {String} tagline - sinopsis corta de la película
+ * @property {ApiCollection} collection - colección de recursos de la película
+ * @property {Array.<String>} genres - géneros de la película
+ * @property {ApiDate} releaseDate - fecha en la que se estrenó
+ * @property {Array.<String>} keywords - keywords de la película
+ * @property {Array.<ApiProducer>} producers - productoras de la película
+ * @property {Array.<ApiCrew>} crew - empleados varios de la película
+ * @property {Array.<ApiCast>} cast - actores de la película
+ * @property {Array.<ApiResource>} resources - recursos de la película
+ * @property {Number} budget - presupuesto de la película
+ * @property {'RUMORED', 'PLANNED', 'PRODUCTION', 'POSTPRODUCTION', 'RELEASED', 'CANCELLED'} status - estado de la película
+ * @property {Number} runtime - runtime de la película
+ * @property {Number} revenue - recaudación de la película
+ */
+
+/**
+ * @typedef ApiPageFilms - representación de una página con películas de la API
+ * @property {Array.<ApiFilm>} content - el contenido de la página
+ * @property {Boolean} pagination.hasPrevious - si tiene página anterior
+ * @property {Boolean} pagination.hasnext - si tiene página siguiente
+ */
+
+/**
+ * @typedef ApiPageUsers - representación de una página con usuarios de la API
+ * @property {Array.<ApiUser>} content - el contenido de la página
+ * @property {Boolean} pagination.hasPrevious - si tiene página anterior
+ * @property {Boolean} pagination.hasnext - si tiene página siguiente
+ */
+
+/**
+ * @typedef ApiAssessment - representación de un comentario en la api
+ * @property {String} id - el identificador del comentario
+ * @property {ApiFilm} movie - película que se comenta
+ * @property {ApiUser} user - usuario que comenta
+ * @property {Number} rating - valoración del usuario (1-10)
+ * @property {String} comment - comentario del usuario
+ */
+
+/**
+ * @typedef ApiPageAssessmets - representación de una página con usuarios de la API
+ * @property {Array.<ApiAssessment>} content - el contenido de la página
+ * @property {Boolean} pagination.hasPrevious - si tiene página anterior
+ * @property {Boolean} pagination.hasnext - si tiene página siguiente
+ */
 
 
 let __instance = null
@@ -48,7 +175,7 @@ export default class API {
      * @param {Object.<String,'asc'|'desc'>} [sort={}] - los criterios de ordenación de la búsqueda
      * @param {Number} [page=0] - la página que se desee obtener
      * @param {Number} [size=7] - el número de elementos que constendrá la página
-     * @returns {Promise<{pagination: {hasPrevious: boolean, hasNext: boolean}, content: *[Object]}>} - el resultado de la búsqueda
+     * @returns {Promise<ApiPageFilms>} - el resultado de la búsqueda
      */
     async findMovies(
         {
@@ -90,7 +217,8 @@ export default class API {
 
         const bodyContent = await rawResult.json()
 
-        let finalContent = {pagination: {hasNext: false, hasPrevious: false}, content: []}
+
+        let finalContent = /** @type {ApiPageFilms}*/ ({pagination: {hasNext: false, hasPrevious: false}, content: []})
 
         if (rawResult.status === 200) { // salió bien
             //construimos el objeto resultado
@@ -107,35 +235,13 @@ export default class API {
             console.error("Error a la hora de buscar películas en la API con los parámetros ", params, ". Descripción de error: ", bodyContent)
             return finalContent;
         }
-
-        /*
-                return new Promise(resolve => {
-                    const filtered = DATA.movies
-                        ?.filter(movie => movie.title.toLowerCase().includes(title.toLowerCase() || ''))
-                        ?.filter(movie => genre !== '' ? movie.genres.map(genre => genre.toLowerCase()).includes(genre.toLowerCase()) : true)
-                        ?.filter(movie => movie.status.toLowerCase().includes(status.toLowerCase() || ''))
-
-                    const data = {
-                        content: filtered?.slice(size * page, size * page + size),
-                        pagination: {
-                            hasNext: size * page + size < filtered.length,
-                            hasPrevious: page > 0
-                        }
-                    }
-
-                    resolve(data)
-                })
-
-         */
-
-
     }
 
 
     /**
      * Obtiene una película en concreto por su identificador
      * @param {Number} id el identificador numérico de la película
-     * @returns {Promise<Object>} el objeto película encontrado encontrado
+     * @returns {Promise<ApiFilm>} el objeto película encontrado encontrado
      */
     async findMovie(id) {
 
@@ -160,7 +266,7 @@ export default class API {
     /**
      * Obtiene un usuario a partir de su email
      * @param {String} id el email del usuario
-     * @returns {Promise<Object>} el objeto usuario que devuelve
+     * @returns {Promise<ApiUser>} el objeto usuario que devuelve
      */
     async findUser(id) {
 
@@ -187,7 +293,7 @@ export default class API {
      * @param {Object.<String,'asc'|'desc'>} [sort={}] - los criterios de ordenación de la búsqueda
      * @param {Number} [page=0] - la página que se desee obtener
      * @param {Number} [size=10] - el número de elementos que constendrá la página
-     * @returns {Promise<{pagination: {hasPrevious: boolean, hasNext: boolean}, content: *[Object]}>} - el resultado de la búsqueda
+     * @returns {Promise<ApiPageAssessmets>} - el resultado de la búsqueda
      */
     async findComments(
         {
@@ -201,7 +307,7 @@ export default class API {
         }
     ) {
 
-        let finalContent = {pagination: {hasNext: false, hasPrevious: false}, content: []}
+        let finalContent = /** @type {ApiPageAssessmets}*/ ({pagination: {hasNext: false, hasPrevious: false}, content: []})
 
         if (movie === user) return finalContent
 
@@ -243,14 +349,8 @@ export default class API {
 
     /**
      * Crea un comentario en la aplicación
-     * @param {Object} comment - el comentario a crear
-     * @param {Number} comment.rating - la puntuación de la película
-     * @param {String} comment.comment - crítica de la película
-     * @param {Object} comment.movie - objeto película que se comenta
-     * @param {String} comment.movie.id - identificador de la película
-     * @param {Object} comment.user - objeto usuario que se enviará
-     * @param {String} comment.user.email - email del usuario (su identificador)
-     * @returns {Promise<{rating: Number, comment: String, movie: {id: String}, user: {email: String}}>}
+     * @param {ApiAssessment} comment - el comentario a crear
+     * @returns {Promise<ApiAssessment>} - el comentario creado
      */
     async createComment(comment) {
 
@@ -268,35 +368,17 @@ export default class API {
             return bodyContent
         } else {
             console.error('Creación de comentarios errónea. Argumento ->', comment, '. Resultado -> ', rawResult)
-            comment.rating = 0
+            comment.rating = -1
             comment.comment = 'Error al crear comentario'
             return comment
         }
     }
 
-    /**
-     * @typedef Birthday
-     * @property {Number} day - día del año
-     * @property {Number} month - mes del año
-     * @property {Number} year - año
-     */
-
-    /**
-     * @typedef User - representación del usuario en el sistema
-     * @property {String} email - el email del usuario identificador
-     * @property {String} name - el nombre del usuario
-     * @property {String} country - el pais del usuario
-     * @property {String} picture - la foto de perfil del usuario
-     * @property {Birthday} birthday - el cumpleaños del usuario
-     * @property {String} password - la contraseña del usuario
-     * @property {Array.<String>} roles - los roles que tiene el usuario en el sistema
-     *
-     */
 
     /**
      * Crea un objeto usuario pasado por argumentos
-     * @param {User} user - el usuario que se desee crear
-     * @returns {Promise<User>} - la respuesta que da la api a que se introduzaca un nuevo usuario
+     * @param {ApiUser} user - el usuario que se desee crear
+     * @returns {Promise<ApiUser>} - la respuesta que da la api a que se introduzaca un nuevo usuario
      */
     async createUser(user) {
         //preparamos la consulta
@@ -307,7 +389,7 @@ export default class API {
             body: JSON.stringify(user)
         })
 
-        if(rawResult.status === 201){ //si las cosas fueron bien
+        if (rawResult.status === 201) { //si las cosas fueron bien
             const bodyContent = await rawResult.json();
             console.log('Creación del usuario correcta. Argumento ->', user, '. Resultado -> ', bodyContent)
             return bodyContent
@@ -321,8 +403,8 @@ export default class API {
     /**
      * Modifica al propio usuario de la app ??
      * @param {String} id - el identificador del usuario
-     * @param {User} user - el objeto usuario actualizado
-     * @returns {Promise<User>} - el objeto usuario modificado que devuelva la api
+     * @param {ApiUser} user - el objeto usuario actualizado
+     * @returns {Promise<ApiUser>} - el objeto usuario modificado que devuelva la api
      */
     async updateUser(id, user) {
         user.email = id
@@ -333,7 +415,7 @@ export default class API {
             body: JSON.stringify(user)
         })
 
-        if(rawResult.status === 201){ //si las cosas fueron bien
+        if (rawResult.status === 201) { //si las cosas fueron bien
             const bodyContent = await rawResult.json();
             console.log('Modificación del usuario correcta. Argumento ->', user, '. Resultado -> ', bodyContent)
             return bodyContent
