@@ -1,8 +1,13 @@
 import { useParams } from 'react-router-dom'
-import { ArrowCircleLeftOutline as Back, PencilAltOutline as Edit } from '@graywolfai/react-heroicons'
+import {
+    ArrowCircleLeftOutline as Back,
+    AtSymbolOutline,
+    FingerPrintOutline,
+    PencilAltOutline as Edit
+} from '@graywolfai/react-heroicons'
 import ReactPlayer from 'react-player'
 
-import { Shell, Link, TODO, Separator } from '../../components'
+import {Shell, Link, TODO, Separator, CommentList, Button, Input, Logo, TextArea} from '../../components'
 
 import { useMovie, useComments } from '../../hooks'
 
@@ -13,6 +18,7 @@ import ITunes from './icons/itunes.png'
 import Netflix from './icons/netflix.png'
 import Prime from './icons/prime_video.png'
 import Youtube from './icons/youtube.png'
+import {useState} from "react";
 
 const backdrop = movie => {
     const backdrop = movie?.resources?.find(res => res?.type === 'BACKDROP')?.url
@@ -117,13 +123,76 @@ function Cast({ movie }) {
         </ul>
     </>
 }
+
+function CastMember({ person }) {
+    return <li className = 'overflow-hidden'>
+        <img src = { person?.picture }
+             alt = { `${person.name} profile` }
+             className = 'w-full object-top object-cover rounded shadow'
+             style = {{ aspectRatio: '2/3' }}/>
+        <span className = 'font-bold block'> { person?.name } </span>
+        <span className = 'text-sm block'> { person?.character } </span>
+    </li>
+}
+
+/**
+ * @typedef {import('../../api/index.js').ApiPageAssessmets} ApiPageAssessmets
+ * @typedef {import('../../api/index.js').ApiAssessment} ApiAssessment
+ */
+
 function Comments({ movie }) {
     const { comments, createComment } = useComments({ filter: { movie : movie.id } } )
 
-    return <div className = 'mt-16'>
-        <TODO>Añadir lista de comentarios y formulario para añadir nuevo comentario</TODO>
-    </div>
+    const [valoration, setValoration] = useState(0);
+    const [description, setDescription] = useState('');
+
+    const submit = (event) => {
+        console.log(valoration,description)
+        event.preventDefault()
+        if(valoration !== 0 && description !== ''){
+            let comment = /**@type {ApiAssessment}*/ ({})
+            comment.rating = valoration
+            comment.comment = description
+            comment.movie = {id: movie.id}
+            comment.user= {email: localStorage.getItem('user')}
+            createComment(comment)
+        }
+    }
+
+    return <>
+        <h2 className = 'mt-16 font-bold text-2xl'>Comentarios</h2>
+        <Separator />
+        <CommentList comments={comments}/>
+        <div>
+            <form className = 'bg-white rounded p-8 flex flex-col shadow-md text-teal-900'
+                  onSubmit = { submit }
+                  autoComplete = 'off'>
+                <Input type = 'text'
+                       name = 'valoracion'
+                       label = 'Puntuacion'
+                       labelClassName = 'mb-4'
+                       variant = 'primary'
+                       value = { valoration }
+                       onChange = { evt => setValoration(evt.target.value) }
+                />
+                <TextArea type = 'password'
+                       name = 'password'
+                       label = 'Comentario'
+                       labelClassName = 'mb-8'
+                       variant = 'primary'
+                       value = { description }
+                       onChange = { evt => {console.log(description); setDescription(evt.target.value)} }
+                />
+                <Button className = 'mt-8' type = 'submit' variant = 'secondary'>Añadir comentario</Button>
+            </form>
+        </div>
+    </>
 }
+
+function Comment({comment}) {
+
+}
+
 function Tagline({ movie }) {
     if(movie.tagline) {
         return <q className={`block text-3xl font-semibold text-black italic w-full px-8 py-4 text-right`}>
@@ -166,16 +235,7 @@ function Links({ movie }) {
         { links }
     </>
 }
-function CastMember({ person }) {
-    return <li className = 'overflow-hidden'>
-        <img src = { person?.picture }
-             alt = { `${person.name} profile` }
-             className = 'w-full object-top object-cover rounded shadow'
-             style = {{ aspectRatio: '2/3' }}/>
-        <span className = 'font-bold block'> { person?.name } </span>
-        <span className = 'text-sm block'> { person?.character } </span>
-    </li>
-}
+
 function PlatformLink({ type = '', url = '', ...props }) {
     switch (type) {
         case 'DISNEY_PLUS':

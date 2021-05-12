@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import {useEffect, useState} from 'react'
 
 import API from '../api'
 
 export function useMovies(query = {}) {
-    const [data, setData] = useState({ content: [], pagination: { hasNext: false, hasPrevious: false }})
+    const [data, setData] = useState({content: [], pagination: {hasNext: false, hasPrevious: false}})
     const queryString = JSON.stringify(query)
 
     useEffect(() => {
@@ -40,12 +40,12 @@ export function useUser(id = null) {
     }, [userId])
 
     const create = user => API.instance()
-            .createUser(user)
-            .then(user => setData(user))
+        .createUser(user)
+        .then(user => setData(user))
 
     const update = user => API.instance()
-            .updateUser(id, user)
-            .then(user => setData(user))
+        .updateUser(id, user)
+        .then(user => setData(user))
 
     return {
         user: data,
@@ -54,28 +54,58 @@ export function useUser(id = null) {
     }
 }
 
-export function useComments(query = {}){
-    const [data, setData] = useState({ content: [], pagination: { hasNext: false, hasPrevious: false }})
+/**
+ * @typedef {import('../api/index.js').ApiPageAssessmets} ApiPageAssessmets
+ * @typedef {import('../api/index.js').ApiAssessment} ApiAssessment
+ */
+
+/**
+ *
+ * @param query
+ * @returns {{comments: ApiPageAssessmets, createComment: function(ApiAssessment): void}}
+ */
+export function useComments(query = {}) {
+
+    const [data, setData] = useState({content: [], pagination: {hasNext: false, hasPrevious: false}})
     const queryString = JSON.stringify(query)
 
+    //
     useEffect(() => {
         API.instance()
             .findComments(JSON.parse(queryString))
-            .then(setData)
+            .then(result => setData({
+                content: result.content,
+                pagination: {
+                    hasNext: result.pagination.hasnext,
+                    hasPrevious: result.pagination.hasPrevious
+                }
+            }))
     }, [queryString])
 
     const create = comment => {
         API.instance()
             .createComment(comment)
-            .then( () => {
+            .then(() => {
                 API.instance()
                     .findComments(query)
-                    .then(setData)
+                    .then(result => setData({
+                        content: result.content,
+                        pagination: {
+                            hasNext: result.pagination.hasnext,
+                            hasPrevious: result.pagination.hasPrevious
+                        }
+                    }))
             })
     }
 
     return {
-        comments: data,
+        comments: /**@type ApiPageAssessmets}*/ {
+            content: data.content,
+            pagination: {
+                hasNext: data.pagination.hasnext,
+                hasPrevious: data.pagination.hasPrevious
+            }
+        },
         createComment: create
     }
 }

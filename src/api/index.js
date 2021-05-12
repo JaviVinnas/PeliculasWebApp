@@ -307,7 +307,10 @@ export default class API {
         }
     ) {
 
-        let finalContent = /** @type {ApiPageAssessmets}*/ ({pagination: {hasNext: false, hasPrevious: false}, content: []})
+        let finalContent = /** @type {ApiPageAssessmets}*/ ({
+            pagination: {hasNext: false, hasPrevious: false},
+            content: []
+        })
 
         if (movie === user) return finalContent
 
@@ -356,18 +359,25 @@ export default class API {
 
         comment.user.email = localStorage.getItem('user')
 
-        const rawResult = await fetch(`../api/assessments`, {
+        //convertimos puntuación en número
+        comment.rating = Number.parseInt(comment.rating)
+        const request = {
             method: 'POST',
-            headers: {'Authorization': localStorage.getItem('token')},
+            headers: {
+                'Authorization': localStorage.getItem('token'),
+                'Content-Type': 'application/json;charset=UTF-8'
+            },
             body: JSON.stringify(comment)
-        }).catch(ex => console.error(`Error al buscar películas: ${ex}`))
+        }
+
+        const rawResult = await fetch(`../api/assessments`, request).catch(ex => console.error(`Error al buscar películas: ${ex}`))
 
         if (rawResult.status === 201) {
             const bodyContent = await rawResult.json();
-            console.log('Creación de comentarios correcta. Argumento ->', comment, '. Resultado -> ', bodyContent)
+            console.log('Creación de comentarios correcta. Argumento ->', request, '. Resultado -> ', bodyContent)
             return bodyContent
         } else {
-            console.error('Creación de comentarios errónea. Argumento ->', comment, '. Resultado -> ', rawResult)
+            console.error('Creación de comentarios errónea. Argumento ->', request, '. Resultado -> ', rawResult)
             comment.rating = -1
             comment.comment = 'Error al crear comentario'
             return comment
