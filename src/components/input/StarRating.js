@@ -1,10 +1,9 @@
 import {FilmOutline as StarIcon} from '@graywolfai/react-heroicons'
 import {useState} from "react";
 
-export function StarRating({value = 0 || null} = {value: 0}) {
+export function StarRating({rating = 0 || null, setRating = (() => {}) || null} = {rating: 0, setRating: null}) {
 
-    const [rating, setRating] = useState(parseInt(value) || 0) //la valoración actual
-    const [selection, setSelection] = useState(0); //la selección
+    const [selection, setSelection] = useState(0); //la selección cuando pasas el ratón encima
 
     const hoveOver = event => {
         let val = 0
@@ -19,6 +18,7 @@ export function StarRating({value = 0 || null} = {value: 0}) {
             onMouseOut={() => hoveOver(null)}
             onClick={event => setRating(event.target.getAttribute('starId') || rating)}
             onMouseOver={hoveOver}
+            className='flex'
         >
             {Array.from({length: 10}, (v, i) => (
                 <Star
@@ -33,10 +33,9 @@ export function StarRating({value = 0 || null} = {value: 0}) {
 
 }
 
-const Star = ({size = 'w-8 h-8', marked = false, starId = 0} = {size: 'w-8 h-8', marked: false, starId: 0}) => {
+const Star = ({size = 'w-8 h-8 p-1.5 mr-2', marked = false, starId = 0} = {size: 'w-8 h-8', marked: false, starId: 0}) => {
     return (
         <StarIcon starId={starId}
-                  className={`transform rotate-6 mr-4 ${size} ${marked ? 'text-red-500' : 'text-gray-500'}`}/>
-
+                  className={`transform rounded-full rotate-6 text-white ${size} ${marked ? 'bg-red-500' : 'bg-gray-500'}`}/>
     )
 }

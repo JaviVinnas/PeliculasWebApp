@@ -146,7 +146,7 @@ export default class API {
      * @returns {Promise<boolean>} si las cosas fuero bien o mal
      */
     async login(email, password) {
-        const result = await fetch("../api/login", {
+        const result = await fetch("http://localhost:3000/api/login", {
             method: 'post',
             body: JSON.stringify({email, password})
         }).catch(ex => console.error(`Error al llamar a la API en el login ${ex}`))
@@ -210,7 +210,7 @@ export default class API {
         } catch (ignore) {
         }
 
-        const rawResult = await fetch('../api/movies?' + new URLSearchParams(params), {
+        const rawResult = await fetch('http://localhost:3000/api/movies?' + new URLSearchParams(params), {
             method: 'GET',
             headers: {'Authorization': localStorage.getItem('token')}
         }).catch(ex => console.error(`Error al buscar películas: ${ex}`))
@@ -246,7 +246,7 @@ export default class API {
     async findMovie(id) {
 
 
-        const rawResult = await fetch(`../api/movies/${id}`, {
+        const rawResult = await fetch(`http://localhost:3000/api/movies/${id}`, {
             method: 'GET',
             headers: {'Authorization': localStorage.getItem('token')}
         }).catch(ex => console.error(`Error al buscar una película con id ${id}: ${ex}`))
@@ -270,7 +270,7 @@ export default class API {
      */
     async findUser(id) {
 
-        const rawResult = await fetch(`../api/users/${id}`, {
+        const rawResult = await fetch(`http://localhost:3000/api/users/${id}`, {
             method: 'GET',
             headers: {'Authorization': localStorage.getItem('token')}
         }).catch(ex => console.error(`Error al buscar una película con id ${id}: ${ex}`))
@@ -314,7 +314,7 @@ export default class API {
 
         if (movie === user) return finalContent
 
-        const url = `../api/${movie !== '' ? `movies/${movie}` : `users/${user}`}/assessments`
+        const url = `http://localhost:3000/api/${movie !== '' ? `movies/${movie}` : `users/${user}`}/assessments`
 
         let params = {page, size}
 
@@ -370,7 +370,7 @@ export default class API {
             body: JSON.stringify(comment)
         }
 
-        const rawResult = await fetch(`../api/assessments`, request).catch(ex => console.error(`Error al buscar películas: ${ex}`))
+        const rawResult = await fetch(`http://localhost:3000/api/assessments`, request).catch(ex => console.error(`Error al buscar películas: ${ex}`))
 
         if (rawResult.status === 201) {
             const bodyContent = await rawResult.json();
@@ -393,7 +393,7 @@ export default class API {
     async createUser(user) {
         //preparamos la consulta
 
-        const rawResult = await fetch('../api/users', {
+        const rawResult = await fetch('http://localhost:3000/api/users', {
             method: 'POST',
             headers: {'Authorization': localStorage.getItem('token')},
             body: JSON.stringify(user)
@@ -419,7 +419,7 @@ export default class API {
     async updateUser(id, user) {
         user.email = id
 
-        const rawResult = await fetch('../api/users', {
+        const rawResult = await fetch('http://localhost:3000/api/users', {
             method: 'PUT',
             headers: {'Authorization': localStorage.getItem('token')},
             body: JSON.stringify(user)

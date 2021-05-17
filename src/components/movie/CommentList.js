@@ -5,6 +5,7 @@ import {ChevronLeftOutline as Left, ChevronRightOutline as Right} from '@graywol
 import {Button} from '../'
 
 import {useMovies} from '../../hooks'
+import {StaticStarRating} from "../input/StaticStarRating";
 
 /**
  * @typedef {import('../../api/index.js').ApiPageAssessmets} ApiPageAssessmets
@@ -19,7 +20,7 @@ import {useMovies} from '../../hooks'
  */
 export function CommentList({comments}) {
 
-    const [page, setPage] = useState(0)
+    const [page, setPage] = useState(comments?.content?.length || 0)
 
     const nextPage = evt => {
         evt?.target?.blur();
@@ -43,7 +44,7 @@ export function CommentList({comments}) {
                         onClick={prevPage}>
                     <Left className='w-6 h-6 pointer-events-none'/>
                 </Button>
-                <ul className='w-full flex-1 grid grid-cols-7 gap-2 relative items-center justify-center'>
+                <ul className='w-full flex-1 grid grid-cols-2 gap-3 relative items-center justify-center'>
                     {comments?.content?.map(comment => <Comment comment={comment} key={comment.id}/>)}
                 </ul>
                 <Button className='rounded-full'
@@ -62,36 +63,21 @@ export function CommentList({comments}) {
  * @constructor
  */
 function Comment({comment}) {
-    return <li className={`w-full transition transform cursor-pointer rounded-md bg-white overflow-hidden relative shadow
-                             hover:scale-125 hover:shadow-md hover:z-20
-                           `}
-               style={{aspectRatio: '2/3'}}
+    return <li className={`w-full rounded-md bg-white overflow-hidden relative shadow-lg`}
+               style={{aspectRatio: '6/3'}}
     >
-        <article>
-            <div>
-                {comment.rating}
+        <article className='p-2'>
+            <div className='flex justify-between content-center'>
+                <div className=' flex-1 font-bold text-gray-800'>
+                    {comment?.user?.email}
+                </div>
+                <div className='flex-1'>
+                    <StaticStarRating rating={comment.rating}/>
+                </div>
             </div>
             <div>
                 {comment.comment}
             </div>
-            <div>
-                {comment?.user?.email}
-            </div>
         </article>
-
-    </li>
-}
-
-function Poster({className = '', movie}) {
-    return <li className={`w-full transition transform cursor-pointer rounded-md bg-white overflow-hidden relative shadow
-                             hover:scale-125 hover:shadow-md hover:z-20
-                             ${className}`}
-               style={{aspectRatio: '2/3'}}
-    >
-        <Link to={`/movies/${movie.id}`}>
-            <img className='w-full h-full object-cover'
-                 src={movie.resources.find(res => res.type === 'POSTER').url}
-                 alt={`${movie.title} poster`}/>
-        </Link>
     </li>
 }

@@ -30,7 +30,9 @@ const poster = movie => movie?.resources?.find(res => res?.type === 'POSTER')?.u
 
 export default function Movie() {
     const { id } = useParams()
+    console.log('Id obtenido para visualizar -> ', id)
     const movie = useMovie(id)
+    console.log('Película obtenida para visualizar -> ', movie)
 
     return <Shell>
         <img style = {{ height: '36rem' }}
@@ -141,7 +143,7 @@ function CastMember({ person }) {
  */
 
 function Comments({ movie }) {
-    const { comments, createComment } = useComments({ filter: { movie : movie.id } } )
+    const { comments, createComment } = useComments({ filter: { movie : movie.id }, pagination: {page: 0, size: 2} } )
 
     const [valoration, setValoration] = useState(0);
     const [description, setDescription] = useState('');
@@ -155,6 +157,8 @@ function Comments({ movie }) {
             comment.comment = description
             comment.movie = {id: movie.id}
             comment.user= {email: localStorage.getItem('user')}
+            setValoration(0)
+            setDescription('')
             createComment(comment)
         }
     }
@@ -164,34 +168,29 @@ function Comments({ movie }) {
         <Separator />
         <CommentList comments={comments}/>
         <div>
-            <StarRating value={2}/>
+
             <form className = 'bg-white rounded p-8 flex flex-col shadow-md text-teal-900 text-red-800'
                   onSubmit = { submit }
                   autoComplete = 'off'>
-                <Input type = 'text'
-                       name = 'valoracion'
-                       label = 'Puntuacion'
-                       labelClassName = 'mb-4'
-                       variant = 'primary'
-                       value = { valoration }
-                       onChange = { evt => setValoration(evt.target.value) }
-                />
-                <TextArea type = 'password'
-                       name = 'password'
-                       label = 'Comentario'
-                       labelClassName = 'mb-8'
-                       variant = 'primary'
-                       value = { description }
-                       onChange = { evt => {console.log(description); setDescription(evt.target.value)} }
-                />
-                <Button className = 'mt-8' type = 'submit' variant = 'secondary'>Añadir comentario</Button>
+                <div className='flex'>
+                    <div className='flex-initial'>
+                        <div className='font-bold text-gray-800 my-4'>Y a ti, que te ha parecido?</div>
+                        <StarRating rating={valoration} setRating={setValoration}/>
+                        <Button className = 'mt-8' type = 'submit' variant = 'secondary'>Publicar</Button>
+                    </div>
+                    <div className='flex-initial text-gray-800 w-screen'>
+                        <TextArea type = 'password'
+                                  name = 'password'
+                                  className='mx-4 border-2 border-opacity-100 border-gray-500'
+                                  placeholder='Escribe aqui tu comentario y comparte tu opinión con otros usuarios! Pero por favor, evita hacer spoilers...'
+                                  value = { description }
+                                  onChange = { evt => {console.log(description); setDescription(evt.target.value)} }
+                        />
+                    </div>
+                </div>
             </form>
         </div>
     </>
-}
-
-function Comment({comment}) {
-
 }
 
 function Tagline({ movie }) {
@@ -309,7 +308,7 @@ function PlatformLink({ type = '', url = '', ...props }) {
                     Reproducir en Netflix
                 </span>
             </a>
-        case 'PRIME_VIDEO':
+        case 'AMAZON_PRIME':
             return <a target = '_blank'
                       rel = 'noreferrer'
                       href = { url }
