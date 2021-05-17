@@ -7,7 +7,7 @@ import {
 } from '@graywolfai/react-heroicons'
 import ReactPlayer from 'react-player'
 
-import {Shell, Link, TODO, Separator, CommentList, Button, Input, Logo, TextArea} from '../../components'
+import {Shell, Link, TODO, Separator, CommentList, Button, Input, Logo, TextArea, StarRating} from '../../components'
 
 import { useMovie, useComments } from '../../hooks'
 
@@ -164,7 +164,8 @@ function Comments({ movie }) {
         <Separator />
         <CommentList comments={comments}/>
         <div>
-            <form className = 'bg-white rounded p-8 flex flex-col shadow-md text-teal-900'
+            <StarRating value={2}/>
+            <form className = 'bg-white rounded p-8 flex flex-col shadow-md text-teal-900 text-red-800'
                   onSubmit = { submit }
                   autoComplete = 'off'>
                 <Input type = 'text'

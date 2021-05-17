@@ -31,7 +31,9 @@ export function CommentList({comments}) {
     }
 
     if (comments?.content?.length === 0)
-        return null
+        return <div className = 'p-4 w-full rounded bg-gray-100 my-8'>
+            <span className = 'text-xs font-bold uppercase'>Sin comentarios todavía</span>
+        </div>
     else
         return <section className={`p-4 w-full mx-auto`}>
             <div className='w-full flex items-center gap-4'>
@@ -59,7 +61,7 @@ export function CommentList({comments}) {
  * @param {ApiAssessment} comment
  * @constructor
  */
-function Comment({comment}){
+function Comment({comment}) {
     return <li className={`w-full transition transform cursor-pointer rounded-md bg-white overflow-hidden relative shadow
                              hover:scale-125 hover:shadow-md hover:z-20
                            `}
