@@ -38,7 +38,7 @@ export function CommentList({comments, setPageNum}) {
         return <>
             <section className={`p-4 w-full mx-auto`}>
                 <div className='w-full flex items-center gap-4'>
-                    <Button className='rounded-full'
+                    <Button className='h-80'
                             variant={'plain-secondary'}
                             disabled={!comments?.pagination?.hasPrevious}
                             onClick={prevPage}>
@@ -47,7 +47,7 @@ export function CommentList({comments, setPageNum}) {
                     <ul className='w-full flex-1 grid grid-cols-2 gap-2 relative items-center justify-center'>
                         {comments?.content?.map(comment => <Comment comment={comment} key={comment.id}/>)}
                     </ul>
-                    <Button className='rounded-full'
+                    <Button className='h-80'
                             variant={'plain-secondary'}
                             disabled={!comments?.pagination?.hasNext}
                             onClick={nextPage}>
