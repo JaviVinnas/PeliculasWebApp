@@ -24,7 +24,14 @@ export function useMovie(id = '') {
             .then(setData)
     }, [id])
 
-    return data
+    const update = movie => API.instance()
+        .updateMovie(movie)
+        .then(setData)
+
+    return {
+        movie: data,
+        update
+    }
 }
 
 export function useUser(id = null) {
@@ -73,13 +80,7 @@ export function useComments(query = {}) {
     useEffect(() => {
         API.instance()
             .findComments(JSON.parse(queryString))
-            .then(result => setData({
-                content: result.content,
-                pagination: {
-                    hasNext: result.pagination.hasnext,
-                    hasPrevious: result.pagination.hasPrevious
-                }
-            }))
+            .then(setData)
     }, [queryString])
 
     const create = comment => {
@@ -88,24 +89,12 @@ export function useComments(query = {}) {
             .then(() => {
                 API.instance()
                     .findComments(query)
-                    .then(result => setData({
-                        content: result.content,
-                        pagination: {
-                            hasNext: result.pagination.hasnext,
-                            hasPrevious: result.pagination.hasPrevious
-                        }
-                    }))
+                    .then(setData)
             })
     }
 
     return {
-        comments: /**@type ApiPageAssessmets}*/ {
-            content: data.content,
-            pagination: {
-                hasNext: data.pagination.hasnext,
-                hasPrevious: data.pagination.hasPrevious
-            }
-        },
+        comments: /**@type ApiPageAssessmets}*/ (data),
         createComment: create
     }
 }

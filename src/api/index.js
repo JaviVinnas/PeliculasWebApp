@@ -264,6 +264,30 @@ export default class API {
     }
 
     /**
+     * Actualiza una película en la base de datos
+     * @param {ApiFilm} movie el identificador numérico de la película
+     * @returns {Promise<ApiFilm>} el objeto película encontrado encontrado
+     */
+    async updateMovie(movie) {
+        const rawResult = await fetch('http://localhost:3000/api/movies', {
+            method: 'PUT',
+            headers: {'Authorization': localStorage.getItem('token'), 'Content-Type': 'application/json;charset=UTF-8'},
+            body: JSON.stringify(movie)
+        }).catch(ex => console.error(`Error al actualizar la película ${movie}`))
+
+        const result = await rawResult.json()
+
+        if (rawResult.status === 200) { //si salió bien
+            console.log('Actualizar película correcto: ', result)
+
+        } else {
+            console.error("Error a la hora de actualizar la película ", movie, ". Descripción de error: ", result)
+        }
+
+        return result
+    }
+
+    /**
      * Obtiene un usuario a partir de su email
      * @param {String} id el email del usuario
      * @returns {Promise<ApiUser>} el objeto usuario que devuelve
@@ -325,7 +349,7 @@ export default class API {
         } catch (ignore) {
         }
 
-        const rawResult = await fetch(url, {
+        const rawResult = await fetch(url + '?' + new URLSearchParams(params), {
             method: 'GET',
             headers: {'Authorization': localStorage.getItem('token')}
         }).catch(ex => console.error(`Error al buscar comentarios: ${ex}`))

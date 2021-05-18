@@ -35,7 +35,7 @@ const poster = movie => movie?.resources?.find(res => res?.type === 'POSTER')?.u
 export default function EditMovie() {
     const {id} = useParams()
     console.log('Id obtenido para editar -> ', id)
-    const movie = useMovie(id)
+    const {movie, update} = useMovie(id)
     console.log('Película obtenido para editar -> ', movie)
     //states para los campos de la película
     const [argumento, setArgumento] = useState('')
@@ -48,6 +48,14 @@ export default function EditMovie() {
 
     console.log('Estado del argumento -> ', argumento)
     console.log('Estado del los recursos -> ', recursos)
+
+    const handleFilmUpdate = (event) => {
+        event.preventDefault()
+        let updatedMovie = {...movie}
+        updatedMovie.resources = recursos
+        updatedMovie.overview = argumento
+        update(updatedMovie)
+    }
 
     return <Shell>
         <img style={{height: '36rem'}}
@@ -62,18 +70,22 @@ export default function EditMovie() {
             <Back className='w-8 h-8'/>
             <span>Volver</span>
         </Link>
-        <form>
-            <Link variant='primary'
-                  className='rounded-full absolute text-white top-4 right-8 flex items-center px-2 py-2 gap-4'
-                  to={`/movies/${id}`}
-            >
-                <Save className='w-8 h-8'/>
-            </Link>
+
+
+
+        <form onSubmit={handleFilmUpdate}>
+            <button type='submit' className='rounded-full absolute top-8 right-8 text-white flex items-center px-2 py-2 gap-4
+                      bg-gradient-to-br from-pink-500 to-yellow-500 via-red-500
+                      hover:from-green-500 hover:to-blue-500 hover:via-teal-500
+                      focus:from-green-500 focus:to-blue-500 focus:via-teal-500'>
+                <Save className='w-8 h-8 '/>
+            </button>
+
 
             <div className='mx-auto w-full max-w-screen-2xl p-8'>
                 <Header movie={movie}/>
                 <Info movie={movie} argumento={argumento} setArgumento={setArgumento}/>
-                <View movie={movie}/>
+                <View movie={movie} recursos={recursos} setRecursos={setRecursos}/>
                 <Cast movie={movie}/>
             </div>
         </form>
@@ -109,7 +121,7 @@ function Info({
                 Argumento
             </h2>
             <TextArea
-                className='border-black m-2'
+                className='border-black m-2 my-8'
                 name='hola'
                 onChange={evt => setArgumento(evt.target.value)}
                 value={argumento}
@@ -128,17 +140,24 @@ function Info({
 
 function View({movie, recursos = [], setRecursos = (()=>{})}) {
 
+    const urlTrailer = recursos.find(recurso => recurso?.type === 'TRAILER')?.url
+
+    const resursosSinTrailer = recursos.filter(recurso => recurso?.type !== 'TRAILER')
 
 
     return <div className='flex gap-4 mt-8'>
         <div className='w-80 z-10'>
-            <Links movie={movie}/>
+            <Links movie={movie} resources={recursos} setResources={setRecursos}/>
         </div>
         <div style={{
             aspectRatio: '16/9'
         }}
              className='flex-1 ml-8 mt-8 bg-pattern-2 flex items-center justify-center z-20'>
-
+            <Input labelClassName='w-full mx-4' type='text' value={urlTrailer || ''} onChange={evt => {
+                //metemos la url en el array otra vez
+                setRecursos( evt.target.value === '' ? resursosSinTrailer : [ {url: evt.target.value, type: 'TRAILER'}, ...resursosSinTrailer])
+            }
+            }/>
         </div>
     </div>
 }
@@ -188,18 +207,23 @@ function CrewMember({movie, job, label}) {
     else return null
 }
 
-function Links({movie}) {
-    const resources = movie?.resources?.filter(r => !['POSTER', 'BACKDROP', 'TRAILER'].includes(r.type))
+//aquí vienen TODOS los recursos
+function Links({movie, resources = [], setResources=(()=>{})}) {
+
+    const [selectedPlatform, setSelectedPlatform] = useState('NETFLIX')
+    //recursos que no son POSTER, BACKDROP ni TRAILER
+    const filteredResources = resources?.filter(r => !['POSTER', 'BACKDROP', 'TRAILER'].includes(r.type))
+
     let links
 
-    if (resources?.length === 0) {
+    if (filteredResources?.length === 0) {
         links = <span className='block p-8 text-center bg-gray-300 font-bold'>
             No se han encontrado enlaces!
         </span>
     } else {
         links = <ul className='space-y-4'>
             {
-                resources?.map(r => <PlatformLink key={r.type} type={r.type} url={r.url}/>)
+                filteredResources?.map(r => <PlatformLink key={r.type} type={r.type} url={r.url}/>)
             }
         </ul>
     }
@@ -208,6 +232,27 @@ function Links({movie}) {
     return <>
         <h2 className='font-bold text-2xl'>Ver ahora</h2>
         <Separator/>
+        <div className='flex my-5'>
+            <div>
+                <select value={selectedPlatform} onChange={e => setSelectedPlatform(e.target.value)} className='font-bold rounded-lg p-5 bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500'>
+                    <option value='NETFLIX'>Netflix</option>
+                    <option value='AMAZON_PRIME'>Amazon prime</option>
+                    <option value='DISNEY_PLUS'>Disney Plus</option>
+                    <option value='ITUNES'>Itunes</option>
+                    <option value='HBO'>HBO</option>
+                    <option value='YOUTUBE'>YouTube</option>
+                    <option value='GOOGLE_PLAY'>Google Play</option>
+                </select>
+            </div>
+            <div>
+                <Input labelClassName='w-full mx-4' className='bg-gray-400' type='text' value={resources?.find( r => r?.type === selectedPlatform)?.url || ''} onChange={evt => {
+                    //obtenemos el array de recursos salvo el actual que estemos editando
+                    const otherResources = resources.filter(resource => resource.type !== selectedPlatform)
+                    setResources( evt.target.value === '' ? otherResources : [ {url: evt.target.value, type: selectedPlatform}, ...otherResources])
+                }
+                }/>
+            </div>
+        </div>
         {links}
     </>
 }

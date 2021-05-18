@@ -44,7 +44,7 @@ export default function Login() {
                        onClick = { reset }
                        variant = 'primary'
                        value = { pass }
-                       onChange = { evt => setPass(evt.target.value) }
+                       onChange = {evt => setPass(evt.target.value)}
                 />
                 <Button className = 'mt-8' type = 'submit' variant = 'secondary'>Entrar</Button>
             </form>

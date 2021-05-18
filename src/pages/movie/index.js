@@ -31,7 +31,7 @@ const poster = movie => movie?.resources?.find(res => res?.type === 'POSTER')?.u
 export default function Movie() {
     const { id } = useParams()
     console.log('Id obtenido para visualizar -> ', id)
-    const movie = useMovie(id)
+    const {movie, update} = useMovie(id)
     console.log('Película obtenida para visualizar -> ', movie)
 
     return <Shell>
@@ -143,7 +143,8 @@ function CastMember({ person }) {
  */
 
 function Comments({ movie }) {
-    const { comments, createComment } = useComments({ filter: { movie : movie.id }, pagination: {page: 0, size: 2} } )
+    const [pageNum, setPageNum] = useState(0)
+    const { comments, createComment } = useComments({ filter: { movie : movie.id }, pagination: {page: pageNum, size: 2} } )
 
     const [valoration, setValoration] = useState(0);
     const [description, setDescription] = useState('');
@@ -166,7 +167,7 @@ function Comments({ movie }) {
     return <>
         <h2 className = 'mt-16 font-bold text-2xl'>Comentarios</h2>
         <Separator />
-        <CommentList comments={comments}/>
+        <CommentList comments={comments} setPageNum={setPageNum}/>
         <div>
 
             <form className = 'bg-white rounded p-8 flex flex-col shadow-md text-teal-900 text-red-800'
