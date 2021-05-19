@@ -1,0 +1,2904 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Red Social de películas REST API",
+    "description": "REST API del proyecto de ingeniería de servicios",
+    "contact": {
+      "name": "Javier Rodríguez Viñas",
+      "email": "javier.rodriguez.vinas@rai.usc.es"
+    },
+    "license": {
+      "name": "MIT Licence",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/",
+      "description": "Servidor local para pruebas",
+      "variables": {}
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication API",
+      "description": "Authentication operations"
+    },
+    {
+      "name": "Assessments API",
+      "description": "Operaciones sobre comentarios que dejan los usuarios en las películas"
+    },
+    {
+      "name": "Movie API",
+      "description": "Operaciones sobre las películas"
+    },
+    {
+      "name": "User API",
+      "description": "Operaciones sobre los usuarios y las amistades que hubiera entre ellos"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Busca a usuarios",
+        "description": "Obtiene páginas de usuarios según diversos parámetros. Accesible por todos los usuarios que estén logueados. Devuelve links a sí mismo, a la primera, la última , la anterior y la siguiente página y además a un recurso concreto",
+        "operationId": "Search users",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Nombre del usuario",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "El email del usuario (su identificador único)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "El nº de página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "El nº máximo de elementos que tendrá la página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Los criterios de ordenación",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "example": "[email:asc,country:desc]"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Se obtiene una lista con los usuarios según diversos filtros",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to one": {
+                "description": "HATEOAS one link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to previous": {
+                "description": "HATEOAS previous link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to first": {
+                "description": "HATEOAS first link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to last": {
+                "description": "HATEOAS last link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to next": {
+                "description": "HATEOAS previous link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageUser"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Modifica un usuario existente en la aplicación",
+        "description": "Modifica los campos de un usuario excepto su email y aniversario. Accesible solamente por el propio usuario. Devuelve links a sí mismo y a la lista de todos los usuarios.",
+        "operationId": "Modify user",
+        "requestBody": {
+          "description": "Objeto user actualizado en formato JSON",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Devuelve el usuario modificado",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Si el email o aniversario fueran nulos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Si el aniversario fuera distinto al actual o no existiera el usuario en el sistema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Genera un usuario",
+        "description": "Crea un nuevo usuario en el sistema. Accesible por cualquiera incluso sin estar logueado. Devuelve links a sí mismo y a la lista de todos los usuarios",
+        "operationId": "Create user",
+        "requestBody": {
+          "description": "Objeto usuario en formato JSON",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          },
+          "201": {
+            "description": "Devuelve el usuario creado",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Hay otro usuario con el email del nuevo usuario introducido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/users/{userId}/friendships/{friendshipId}": {
+      "get": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Obtener amistad entre dos usuarios",
+        "description": "Devuelve todos los detalles de una amistad entre dos usuarios en caso de que exista. Accesible para los usuarios implicados en la amistad (cada uno desde su ruta de usuario/{userId}/friends). Devuelve links a sí mismo, a la lista de todos los amigos al perfil del usuario y al perfil del amigo.",
+        "operationId": "GetFriendship",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "El usuario autenticado en el sistema",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "friendshipId",
+            "in": "path",
+            "description": "El amigo del usuario",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "No se ha encontrado la amistad solicitada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Se devuelve la amistad solicitada",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to user": {
+                "description": "HATEOAS user link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to friend": {
+                "description": "HATEOAS friend link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Friendship"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Aceptar amistad",
+        "description": "Acepta una amistad existente entre dos usuarios. Accesible únicamente por el amigo (amigo pasivo de la amistad y solo desde su ruta {userId}/friendships/{friendshipId}). Devuelve un link a si mismo, al amigo , al usuario y a la lista de todos los amigos del usuario",
+        "operationId": "AcceptFriendship",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "El usuario pasivo que acepta la amistad (y además es el autenticado)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "friendshipId",
+            "in": "path",
+            "description": "Identificador de la amistad",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devuelve la amistad aceptada",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to user": {
+                "description": "HATEOAS user link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to friend": {
+                "description": "HATEOAS friend link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to user friends": {
+                "description": "HATEOAS user friends link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Friendship"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El usuario o el amigo no se encuentran en el sistema, o bien la amistad ya ha sido confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Borra una amistad",
+        "description": "Borra la amistad en la que participe el usuario autenticado. Accesible por el usuario que sea amigo activo, es decir que la haya solicitado él (y solamente desde su ruta {userId}/friendships/{friendshipId}). Devuelve un link a la lista de todos ls amigos",
+        "operationId": "DeleteFriendship",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "Email del usuario autenticado y el que solicitó la amistad",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "friendshipId",
+            "in": "path",
+            "description": "Email del amigo cuya amistad queremos eliminar",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Se eliminó la amistad correctamente",
+            "headers": {
+              "Link to friend": {
+                "description": "HATEOAS friend link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "No se ha encontrado la amistad para eliminar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/movies": {
+      "get": {
+        "tags": [
+          "Movie API"
+        ],
+        "summary": "Busca películas con una serie de filtros",
+        "description": "Busca en la base de datos de películas aplicando los siguentes filtros que se pasan por argumentos. Accesible a los usuarios logueados. Devuelve links a sí mismo, a la siguiente anterior primera última a una concreta",
+        "operationId": "searchFilms",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "description": "Título o fragmento de título que deberán contener las películas",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "LEGO"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "Lista con keywords que deberán tener las películas",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "example": "List [corta,emocionante]"
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "description": "Lista con géneros que deberán tener las películas",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "example": "List [Drama,Suspense]"
+          },
+          {
+            "name": "crew-person",
+            "in": "query",
+            "description": "Identificadores de productores involucrados en las películas",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "example": "List [584624,238027]"
+          },
+          {
+            "name": "cast-person",
+            "in": "query",
+            "description": "Identificadores de actores involucrados en las películas",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "example": "List [102353,87345]"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Fecha en la cual se estrenó la película",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "El nº de página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "El nº máximo de elementos que tendrá la página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Los criterios de ordenación",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "example": "[title:asc,year:desc]"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Se obtiene una lista con las películas encontradas",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to one": {
+                "description": "HATEOAS one link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to previous": {
+                "description": "HATEOAS previous link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to first": {
+                "description": "HATEOAS first link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to last": {
+                "description": "HATEOAS last link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to next": {
+                "description": "HATEOAS previous link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFilm"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Movie API"
+        ],
+        "summary": "Modifica una película existente en la aplicación",
+        "description": "Modifica una película. Accesible a administradores. Devuelve un link a sí misma y a todas las películas",
+        "operationId": "ModifyFilm",
+        "requestBody": {
+          "description": "Objeto film actualizado en formato JSON",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Film"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Devuelve la película modificada",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Si algún actor o productor de la película no existiera o no se encuentre el usuario en el sistema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Movie API"
+        ],
+        "summary": "Crea una nueva película",
+        "description": "Introduce una nueva película en la base de datos. Accesible solo a adminsitradores. Devuelve links a sí misma y a todas las películas.",
+        "operationId": "createFilm",
+        "requestBody": {
+          "description": "Objeto film en formato JSON",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Film"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Devuelve la película creada",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Hay otra película con el mismo id que la que se quiere introducir",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/assessments": {
+      "put": {
+        "tags": [
+          "Assessments API"
+        ],
+        "summary": "Modifica un comentario",
+        "description": "Modifica una valoración pasado por argumentos mediante el envío de la valoración actualizada. Accesible por el usuario que possee la valoración. Devuelve un link a si mismo, a la lista de comentarios de la película y a la lista de comentarios del usuario",
+        "operationId": "modifyAssessmentWithPut",
+        "requestBody": {
+          "description": "Objeto Assessment en formato JSON",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Assessment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Si hay campos a null que no debería estar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Valoración modificada satisfactoriamente",
+            "headers": {
+              "Link to user assessments": {
+                "description": "HATEOAS user assessments link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to film assessments": {
+                "description": "HATEOAS film assessments link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assessment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Si no se encuentra la incidencia que modificar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Assessments API"
+        ],
+        "summary": "Introduce un nuevo comentario en el sistema",
+        "description": "Crea un comentario para una película por parte de un usuario. Accesible para los usuarios logueados en el sistema. Devuelve un link a la película y a su lista de comentarios.",
+        "operationId": "createAssessment",
+        "requestBody": {
+          "description": "Objeto Assessment en formato JSON. Suficiente con que los objetos usuario y película tengan el email e id con contenido respectivamente",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Assessment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "El assessment que se pasa por argumentos no es válido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "No existe el usuario, la película o bien ya hay un comentario con ese usuario y película",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          },
+          "201": {
+            "description": "Devuelve el comentario creado",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/users/{userId}/friendships": {
+      "get": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Obtiene las amistades de un usuario",
+        "description": "Devuelve todas las mistades en las que está involucrado el usuario. Accesible solamente por el propio usuario. Devuelve links a sí mismo, al perfil del amigo y a la primera siguiente anterior y última página.",
+        "operationId": "GetAllUserFriendships",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "El email del usuario del cual se buscarán los amigos",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número de página requerida",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Tamaño de la página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "criterios de ordenación de las amistades",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "example": "List [friend:asc, since:desc]"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Se devuelven la lista de amistades",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to one": {
+                "description": "HATEOAS one link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to previous": {
+                "description": "HATEOAS previous link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to first": {
+                "description": "HATEOAS first link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to last": {
+                "description": "HATEOAS last link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to next": {
+                "description": "HATEOAS previous link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFriendship"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Si no existe el usuario en cuestión del que obtener amistades",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La búsqueda no ha retornado ningún resultado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Genera una solicitud de amistad",
+        "description": "Genera una solicitud de amistad entre dos usuarios. Accesible por todos los usuarios logueados. Devuelve links a la amistad generada y a todas las amistades.",
+        "operationId": "Generate friendship request",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "El email del usuario que solicita la amistad",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "El email del usuario al cual se le solicita amistad",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "friend@gmail.com"
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Se ha generado la solicitud de amistad y se devuelve",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Friendship"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          },
+          "422": {
+            "description": "Si alguno de los usuarios implicados no es localizable, se quiere mandar una solicitud de amistad a uno mismo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "Authentication API"
+        ],
+        "summary": "Login",
+        "description": "Login with username and password to obtain a JWT token.",
+        "operationId": "login",
+        "requestBody": {
+          "description": "User and password for authentication",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "email": "test@test.com",
+                "password": "test"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Autenticación correcta",
+            "headers": {
+              "Authorization": {
+                "description": "Token de autorización en la api",
+                "style": "simple",
+                "schema": {
+                  "type": "Bearer Token"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userId}": {
+      "get": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Obtiene todos los detalles de un usuario",
+        "description": "Recupera los detalles de un usuario del sistema si este existiera. Debes ser el usuario, amigo del usuario o administrador",
+        "operationId": "getOneUserById",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "Email del usuario (su identificador único)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "No hay un usuario para el ID especificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          },
+          "200": {
+            "description": "Se obtiene el usuario satisfactoriamente",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Borra un usuario por su email",
+        "description": "Borra al usuario con el identificador correspondiente (el email). Accesible únicamente por el propio usuario que se quiera eliminar. Devuelve link a la lista con todos los usuarios.",
+        "operationId": "Delete user",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "El email del usuario a eliminar",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "No se ha encontrado el usuario con el email correspondiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "204": {
+            "description": "Se ha borrado al usuario satisfactoriamente",
+            "headers": {
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "User API"
+        ],
+        "summary": "Modifica un usuario existente con JSONPATCH",
+        "description": "Modifica los campos de un usuario excepto su email y aniversario. Accesible solamente por el propio usuario. Devuelve links a sí mismo y a la lista de todos los usuarios",
+        "operationId": "Modifica un usuario existente",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "Email del usuario a modificar",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Las modificaciones en formato JSONPATCH",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              },
+              "example": [
+                {
+                  "op": "replace",
+                  "path": "/country",
+                  "value": "Arizona"
+                }
+              ]
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Devuelve el usuario modificado",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Si el email o aniversario fueran nulos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Si el aniversario fuera distinto al actual o no existiera el usuario en el sistema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/movies/{filmId}": {
+      "get": {
+        "tags": [
+          "Movie API"
+        ],
+        "summary": "Obtiene una película a partir de su identificador",
+        "description": "Obtiene todos los campos de una película por su filmId. Accesible a los usuarios logueados. Devuelve links así mismo y a todas las películas",
+        "operationId": "getFilmById",
+        "parameters": [
+          {
+            "name": "filmId",
+            "in": "path",
+            "description": "Identificador de la película",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "No hay una película para el ID especificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          },
+          "200": {
+            "description": "Se obtiene la película satisfactoriamente",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Movie API"
+        ],
+        "summary": "Borra una película en base a su id",
+        "description": "Elimina una película por su id. Accesible por los administradores. Devuelve un link a todas las películas.",
+        "operationId": "deleteFilm",
+        "parameters": [
+          {
+            "name": "filmId",
+            "in": "path",
+            "description": "El id de la película a eliminar",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Se ha borrado la película satisfactoriamente",
+            "headers": {
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "No se ha encontrado la película con el id correspondiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Movie API"
+        ],
+        "summary": "Modifica una película existente con JSONPATCH",
+        "description": "Modifica una película existente con JSONPATCH. Accesible a administradores. Devuelve un link a sí misma y a todas las películas",
+        "operationId": "ModifyFilmPatch",
+        "parameters": [
+          {
+            "name": "filmId",
+            "in": "path",
+            "description": "Id de la película a modificar",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Las modificaciones en formato JSONPATCH",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              },
+              "example": [
+                {
+                  "op": "replace",
+                  "path": "/title",
+                  "value": "El señor de los Anillos"
+                }
+              ]
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Devuelve la película modificada",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to all": {
+                "description": "HATEOAS all link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Si algún actor o productor de la película no existiera o no se encuentre el usuario en el sistema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/assessments/{assessmentId}": {
+      "get": {
+        "tags": [
+          "Assessments API"
+        ],
+        "summary": "Obtiene un comentario por su Id",
+        "description": "Obtiene una comentario por su id. Accesible por el usuario, amigos y administradores. No devuelve links",
+        "operationId": "getAssessmentById",
+        "parameters": [
+          {
+            "name": "assessmentId",
+            "in": "path",
+            "description": "Identificador de la valoración",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Se devuelve el comentario encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assessment"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No se ha encontrado un comentario con el id especificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Assessments API"
+        ],
+        "summary": "Elimina un comentario",
+        "description": "Elimina un comentario. Accesible por el propio usuario o administradores. Devuelve links a las valoraciones de la película y a la lista de comentarios del usuario",
+        "operationId": "deleteAssessmentById",
+        "parameters": [
+          {
+            "name": "assessmentId",
+            "in": "path",
+            "description": "El id del comentario a eliminar",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Se ha borrado el comentario satisfactoriamente",
+            "headers": {
+              "Link to user assessments": {
+                "description": "HATEOAS user assessments link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to film assessments": {
+                "description": "HATEOAS film assessments link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "422": {
+            "description": "No se ha encontrado el comentario con el id especificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Assessments API"
+        ],
+        "summary": "Modifica un comentario",
+        "description": "Modifica una valoración pasado por argumentos mediante JSONPATCH. Accesible por el usuario que possee la valoración. Devuelve un link a si mismo, a la lista de comentarios de la película y a la lista de comentarios del usuario",
+        "operationId": "modifyAssessmentWithPatch",
+        "parameters": [
+          {
+            "name": "assessmentId",
+            "in": "path",
+            "description": "identificador del comentario a modificar",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Las modificaciones en formato JSONPATCH",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              },
+              "example": [
+                {
+                  "op": "replace",
+                  "path": "/rating",
+                  "value": "7"
+                }
+              ]
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Valoración modificada satisfactoriamente",
+            "headers": {
+              "Link to user assessments": {
+                "description": "HATEOAS user assessments link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to film assessments": {
+                "description": "HATEOAS film assessments link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assessment"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          },
+          "422": {
+            "description": "Si no se encuentra la incidencia que modificar o alguna de las modificaciones no están permitidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/users/{userId}/assessments": {
+      "get": {
+        "tags": [
+          "Assessments API"
+        ],
+        "summary": "Obtiene los comentarios de un usuario",
+        "description": "Obtiene las valoraciones que haya hecho un user determinado. Accesible por el usuario, amigos y administradores. Devuele links a la página siguiente anterior final e inicial y además un link al usuario.",
+        "operationId": "getAssessmentsByUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "El identificador del usuario",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "El nº de página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "El nº máximo de elementos que tendrá la página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Los criterios de ordenación",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "example": "[film:asc,rating:desc]"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Obtiene una lista con los comentarios",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to one": {
+                "description": "HATEOAS one link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to previous": {
+                "description": "HATEOAS previous link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to first": {
+                "description": "HATEOAS first link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to last": {
+                "description": "HATEOAS last link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to next": {
+                "description": "HATEOAS previous link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageAssessment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "No hay ningun usuario con el Id especificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/movies/{filmId}/assessments": {
+      "get": {
+        "tags": [
+          "Assessments API"
+        ],
+        "summary": "Obtiene los comentarios de una película",
+        "description": "Devuelve los comentarios de una película. Accesible para los usuarios logueados. Devuelve links a su mismo, anterior, siguiente, primeroa y última página además de a una película en concreto.",
+        "operationId": "getAssessmentsByFilm",
+        "parameters": [
+          {
+            "name": "filmId",
+            "in": "path",
+            "description": "El identificador de la película",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "El nº de página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "El nº máximo de elementos que tendrá la página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Los criterios de ordenación",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "example": "[user:asc,rating:desc]"
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "No hay ninguna película con el Id especificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Obtiene una lista con los comentarios",
+            "headers": {
+              "Link to self": {
+                "description": "HATEOAS self link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to one": {
+                "description": "HATEOAS one link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to previous": {
+                "description": "HATEOAS previous link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to first": {
+                "description": "HATEOAS first link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to last": {
+                "description": "HATEOAS last link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              },
+              "Link to next": {
+                "description": "HATEOAS previous link",
+                "style": "simple",
+                "schema": {
+                  "type": "link"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageAssessment"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de autorización inválido"
+          },
+          "403": {
+            "description": "No se tienen los permisos necesarios"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Date": {
+        "required": [
+          "day",
+          "month",
+          "year"
+        ],
+        "type": "object",
+        "properties": {
+          "day": {
+            "maximum": 31,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "example": 17
+          },
+          "month": {
+            "maximum": 12,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "example": 2
+          },
+          "year": {
+            "minimum": 1900,
+            "type": "integer",
+            "format": "int32",
+            "example": 1999
+          }
+        }
+      },
+      "User": {
+        "required": [
+          "birthday",
+          "email",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "test@test.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Pepe"
+          },
+          "country": {
+            "type": "string",
+            "example": "Spain"
+          },
+          "picture": {
+            "type": "string",
+            "example": "https://placekitten.com/200/287"
+          },
+          "birthday": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "password": {
+            "type": "string",
+            "example": "1234"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ROLE_USER",
+                "ROLE_ADMIN"
+              ]
+            }
+          }
+        }
+      },
+      "ErrorMessage": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "404 NOT FOUND",
+            "enum": [
+              "100 CONTINUE",
+              "101 SWITCHING_PROTOCOLS",
+              "102 PROCESSING",
+              "103 CHECKPOINT",
+              "200 OK",
+              "201 CREATED",
+              "202 ACCEPTED",
+              "203 NON_AUTHORITATIVE_INFORMATION",
+              "204 NO_CONTENT",
+              "205 RESET_CONTENT",
+              "206 PARTIAL_CONTENT",
+              "207 MULTI_STATUS",
+              "208 ALREADY_REPORTED",
+              "226 IM_USED",
+              "300 MULTIPLE_CHOICES",
+              "301 MOVED_PERMANENTLY",
+              "302 FOUND",
+              "302 MOVED_TEMPORARILY",
+              "303 SEE_OTHER",
+              "304 NOT_MODIFIED",
+              "305 USE_PROXY",
+              "307 TEMPORARY_REDIRECT",
+              "308 PERMANENT_REDIRECT",
+              "400 BAD_REQUEST",
+              "401 UNAUTHORIZED",
+              "402 PAYMENT_REQUIRED",
+              "403 FORBIDDEN",
+              "404 NOT_FOUND",
+              "405 METHOD_NOT_ALLOWED",
+              "406 NOT_ACCEPTABLE",
+              "407 PROXY_AUTHENTICATION_REQUIRED",
+              "408 REQUEST_TIMEOUT",
+              "409 CONFLICT",
+              "410 GONE",
+              "411 LENGTH_REQUIRED",
+              "412 PRECONDITION_FAILED",
+              "413 PAYLOAD_TOO_LARGE",
+              "413 REQUEST_ENTITY_TOO_LARGE",
+              "414 URI_TOO_LONG",
+              "414 REQUEST_URI_TOO_LONG",
+              "415 UNSUPPORTED_MEDIA_TYPE",
+              "416 REQUESTED_RANGE_NOT_SATISFIABLE",
+              "417 EXPECTATION_FAILED",
+              "418 I_AM_A_TEAPOT",
+              "419 INSUFFICIENT_SPACE_ON_RESOURCE",
+              "420 METHOD_FAILURE",
+              "421 DESTINATION_LOCKED",
+              "422 UNPROCESSABLE_ENTITY",
+              "423 LOCKED",
+              "424 FAILED_DEPENDENCY",
+              "425 TOO_EARLY",
+              "426 UPGRADE_REQUIRED",
+              "428 PRECONDITION_REQUIRED",
+              "429 TOO_MANY_REQUESTS",
+              "431 REQUEST_HEADER_FIELDS_TOO_LARGE",
+              "451 UNAVAILABLE_FOR_LEGAL_REASONS",
+              "500 INTERNAL_SERVER_ERROR",
+              "501 NOT_IMPLEMENTED",
+              "502 BAD_GATEWAY",
+              "503 SERVICE_UNAVAILABLE",
+              "504 GATEWAY_TIMEOUT",
+              "505 HTTP_VERSION_NOT_SUPPORTED",
+              "506 VARIANT_ALSO_NEGOTIATES",
+              "507 INSUFFICIENT_STORAGE",
+              "508 LOOP_DETECTED",
+              "509 BANDWIDTH_LIMIT_EXCEEDED",
+              "510 NOT_EXTENDED",
+              "511 NETWORK_AUTHENTICATION_REQUIRED"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Instante en el que se generó el error",
+            "format": "date-time"
+          },
+          "error": {
+            "type": "string",
+            "description": "Descripción del error que ha tenido lugar",
+            "example": "Usuario PEPE no encontrado"
+          },
+          "solution": {
+            "type": "string",
+            "description": "Posibles indicaciones de como solucionar el error",
+            "example": "Debes crear antes dicho usuario antes de solicitarlo"
+          }
+        }
+      },
+      "Friendship": {
+        "required": [
+          "friend",
+          "id",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string",
+            "example": "user@gmail.com"
+          },
+          "friend": {
+            "type": "string",
+            "example": "friend@gmail.com"
+          },
+          "confirmed": {
+            "type": "boolean"
+          },
+          "since": {
+            "$ref": "#/components/schemas/Date"
+          }
+        }
+      },
+      "Cast": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "picture": {
+            "type": "string"
+          },
+          "biography": {
+            "type": "string"
+          },
+          "birthday": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "deathday": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "character": {
+            "type": "string"
+          }
+        }
+      },
+      "Collection": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Resource"
+            }
+          }
+        }
+      },
+      "Crew": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "picture": {
+            "type": "string"
+          },
+          "biography": {
+            "type": "string"
+          },
+          "birthday": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "deathday": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "job": {
+            "type": "string"
+          }
+        }
+      },
+      "Film": {
+        "required": [
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "overview": {
+            "type": "string"
+          },
+          "tagline": {
+            "type": "string"
+          },
+          "collection": {
+            "$ref": "#/components/schemas/Collection"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "releaseDate": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "producers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Producer"
+            }
+          },
+          "crew": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Crew"
+            }
+          },
+          "cast": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Cast"
+            }
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Resource"
+            }
+          },
+          "budget": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "RUMORED",
+              "PLANNED",
+              "PRODUCTION",
+              "POSTPRODUCTION",
+              "RELEASED",
+              "CANCELLED"
+            ]
+          },
+          "runtime": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "revenue": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Producer": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          }
+        }
+      },
+      "Resource": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "POSTER",
+              "BACKDROP",
+              "TRAILER",
+              "NETFLIX",
+              "AMAZON_PRIME",
+              "DISNEY_PLUS",
+              "ITUNES",
+              "HBO",
+              "YOUTUBE",
+              "GOOGLE_PLAY",
+              "TORRENT"
+            ]
+          }
+        }
+      },
+      "Assessment": {
+        "required": [
+          "movie",
+          "rating",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "movie": {
+            "$ref": "#/components/schemas/Film"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "rating": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "example": 7
+          },
+          "comment": {
+            "type": "string",
+            "example": "Buena película"
+          }
+        }
+      },
+      "PageUser": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/Pageable"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "unpaged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Sort": {
+        "type": "object",
+        "properties": {
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageFriendship": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Friendship"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/Pageable"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageAssessment": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Assessment"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/Pageable"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageFilm": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Film"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/Pageable"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "JWT": {
+        "type": "http",
+        "in": "header",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

@@ -54,6 +54,7 @@ export default function EditMovie() {
         let updatedMovie = {...movie}
         updatedMovie.resources = recursos
         updatedMovie.overview = argumento
+        console.log('Película para actualizar -> ', updatedMovie)
         update(updatedMovie)
     }
 
