@@ -435,21 +435,21 @@ export default class API {
     }
 
     /**
-     * Modifica al propio usuario de la app ??
-     * @param {String} id - el identificador del usuario
+     * Modifica al propio usuario de la app
      * @param {ApiUser} user - el objeto usuario actualizado
      * @returns {Promise<ApiUser>} - el objeto usuario modificado que devuelva la api
      */
-    async updateUser(id, user) {
-        user.email = id
-
+    async updateUser(user) {
         const rawResult = await fetch('http://localhost:3000/api/users', {
             method: 'PUT',
-            headers: {'Authorization': localStorage.getItem('token')},
+            headers: {
+                'Authorization': localStorage.getItem('token'),
+                'Content-Type': 'application/json;charset=UTF-8'
+            },
             body: JSON.stringify(user)
         })
 
-        if (rawResult.status === 201) { //si las cosas fueron bien
+        if (rawResult.status === 200) { //si las cosas fueron bien
             const bodyContent = await rawResult.json();
             console.log('Modificación del usuario correcta. Argumento ->', user, '. Resultado -> ', bodyContent)
             return bodyContent

@@ -41,18 +41,16 @@ export function useUser(id = null) {
     useEffect(() => {
         API.instance()
             .findUser(userId)
-            .then(user => {
-                setData(user)
-            })
+            .then(setData)
     }, [userId])
 
     const create = user => API.instance()
         .createUser(user)
-        .then(user => setData(user))
+        .then(setData)
 
-    const update = user => API.instance()
-        .updateUser(id, user)
-        .then(user => setData(user))
+    const update = (user) => API.instance()
+        .updateUser(user)
+        .then(setData)
 
     return {
         user: data,

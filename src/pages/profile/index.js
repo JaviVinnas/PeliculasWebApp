@@ -1,12 +1,14 @@
-import {Button, Comment, Separator, Shell, TODO} from '../../components'
+import {Button, Comment, Link, Separator, Shell, TODO} from '../../components'
 import {useComments, useMovie, useUser} from "../../hooks";
 import {
     LocationMarkerOutline as LocationIcon,
     CalendarOutline as CalendarIcon,
-    PlusOutline as PlusIcon,
+    PlusOutline as PlusIcon, ArrowCircleLeftOutline as Back, PencilAltOutline as Edit,
 } from '@graywolfai/react-heroicons'
 import {useState} from "react";
 import {StaticStarRating} from "../../components/input/StaticStarRating";
+
+const defaultAvatarImageURL = 'https://www.gravatar.com/avatar/?d=mp'
 
 export default function Profile() {
 
@@ -14,10 +16,30 @@ export default function Profile() {
     const {user, create, update} = useUser();
 
     return <Shell className='p-4'>
+
+
         <img style={{height: '30rem'}}
-             src={user?.picture ?? 'https://www.gravatar.com/avatar/?d=mp'}
+             src={user?.picture ?? defaultAvatarImageURL}
              alt={`${user?.name} imagen`}
              className='absolute top-2 left-0 right-0 w-full object-cover filter blur transform scale-105'/>
+
+
+        <Link variant = 'primary'
+              className = 'rounded-full absolute text-white top-4 left-8 flex items-center pl-2 pr-4 py-2 gap-4'
+              to = '/'
+        >
+            <Back className = 'w-8 h-8'/>
+            <span>Volver</span>
+        </Link>
+
+        <Link variant = 'primary'
+              className = 'rounded-full absolute text-white top-4 right-8 flex items-center px-2 py-2 gap-4'
+              to = {`/profile/edit`}
+        >
+            <Edit className = 'w-8 h-8'/>
+        </Link>
+
+
         <UserHeader user={user}/>
         <h2 className = 'mt-4 font-bold text-2xl'>Últimos comentarios</h2>
         <Separator />
@@ -34,9 +56,11 @@ export default function Profile() {
 function UserHeader({user}) {
     return <header className='mt-96 mb-8 mx-20 relative flex items-end pb-8 '>
         <img style={{aspectRatio: '1'}}
-             src={user?.picture ?? 'https://www.gravatar.com/avatar/?d=mp'}
+             src={user?.picture ?? defaultAvatarImageURL}
              alt={`${user?.name} imagen`}
              className='w-64 rounded-full shadow-xl z-40'/>
+
+
         <hgroup className='relative w-full -left-4 z-0'>
             <h1 className={`bg-black bg-opacity-50 backdrop-filter backdrop-blur text-right text-white text-6xl font-bold p-8`}>
                 {user?.name ?? 'Sin nombre'}
@@ -75,7 +99,7 @@ function UserComments({user}) {
 
     const loadMoreComments = (evt) => {
         evt?.target?.blur()
-        setPageSize(s => s+1)
+        setPageSize(s => s+5)
     }
 
     if(comments?.content?.length === 0){

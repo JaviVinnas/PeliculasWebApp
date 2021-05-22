@@ -16,6 +16,7 @@ import Friends from './pages/friends'
 import NotFound from './pages/not-found'
 
 import './styles.css'
+import EditProfile from "./pages/edit-profile";
 
 ReactDOM.render(
     <React.StrictMode>
@@ -45,6 +46,9 @@ ReactDOM.render(
                     </SecuredRoute>
                     <SecuredRoute exact path = '/profile'>
                         <Profile />
+                    </SecuredRoute>
+                    <SecuredRoute exact path = '/profile/edit'>
+                        <EditProfile />
                     </SecuredRoute>
                     <SecuredRoute exact path = '/friends'>
                         <Friends />
