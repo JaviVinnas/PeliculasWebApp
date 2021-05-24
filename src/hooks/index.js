@@ -34,6 +34,40 @@ export function useMovie(id = '') {
     }
 }
 
+/**
+ * @typedef {import('../api/index.js').ApiPageFriendships} ApiPageFriendships
+ * @typedef {import('../api/index.js').ApiFriendship} ApiFriendship
+ */
+
+/**
+ *
+ * @param {string} userId - usuario del cual queremos obtener las amistades
+ * @returns {{friendships: ApiPageFriendships, acceptFriendship: function(friendshipId:string): ApiFriendship }} - página de amistades
+ */
+export function useFriendships(userId = localStorage.getItem('user')) {
+
+    const [data, setData] = useState({content: [], pagination: {hasNext: false, hasPrevious: false}})
+
+    useEffect(() => {
+        API.instance()
+            .getUserFriendShips(userId)
+            .then(data => setData(data))
+    }, [userId])
+
+    const acceptFriendship = (friendshipId = '') => API.instance()
+        .accepFriendship(userId, friendshipId)
+        .then(frienship => API.instance()
+            .getUserFriendShips(frienship.friend)
+            .then(data => setData(data))
+        )
+
+    return {
+        friendships: data,
+        acceptFriendship
+    }
+
+}
+
 export function useUser(id = null) {
     const [data, setData] = useState([])
     const userId = id === null ? localStorage.getItem('user') : id
@@ -58,6 +92,7 @@ export function useUser(id = null) {
         update
     }
 }
+
 
 /**
  * @typedef {import('../api/index.js').ApiPageAssessmets} ApiPageAssessmets
@@ -96,3 +131,4 @@ export function useComments(query = {}) {
         createComment: create
     }
 }
+

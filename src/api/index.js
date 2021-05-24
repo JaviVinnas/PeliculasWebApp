@@ -111,6 +111,22 @@
  */
 
 /**
+ * @typedef ApiFriendship - representación de una amistad en la base de datos
+ * @property {String} id - identificador unívoco de la amistad
+ * @property {String} user - identificador del usuario que solicitó la amistad
+ * @property {String} friend - identificador del usuario al que se le es solicitada la amistad
+ * @property {undefined, boolean} confirmed - si está pendiente, confirmada o rechazada
+ * @property {ApiDate} since - desde cuando está confirmada o rechazada la amistad
+ */
+
+/**
+ * @typedef ApiPageFriendships - representación de una página de amistades en la API
+ * @property {Array.<ApiFriendship>} content - el contenido de la página
+ * @property {Boolean} pagination.hasPrevious - si tiene página anterior
+ * @property {Boolean} pagination.hasnext - si tiene página siguiente
+ */
+
+/**
  * @typedef ApiAssessment - representación de un comentario en la api
  * @property {String} id - el identificador del comentario
  * @property {ApiFilm} movie - película que se comenta
@@ -459,5 +475,80 @@ export default class API {
             return user
         }
 
+    }
+
+    /**
+     * Obtiene las amistades donde esté involucrado un usuario
+     * @param {String} userId - el usuario de cual queramos obtener sus amistades
+     * @returns {Promise<ApiPageFriendships>} - página con las listas de amistades
+     */
+    async getUserFriendShips(userId= localStorage.getItem('user')){
+        const rawResult = await fetch(`http://localhost:3000/api/users/${userId}/friendships`, {
+            method: 'GET',
+            headers: {Authorization: localStorage.getItem('token')}
+        })
+
+        let finalContent = /** @type {ApiPageFriendships}*/ ({
+            pagination: {hasNext: false, hasPrevious: false},
+            content: []
+        })
+
+        const bodyContent = await rawResult.json()
+        if(rawResult.status === 200){
+            finalContent.content = bodyContent.content
+            finalContent.pagination.hasNext = !bodyContent.last
+            finalContent.pagination.hasPrevious = !bodyContent.first
+            console.log(`Buscar amistades de ${userId} correcto. Resultado -> `, finalContent)
+        }else {
+            console.error(`Buscar amistades de ${userId} incorrecto. Resultado -> `, bodyContent)
+        }
+        return finalContent
+    }
+
+    /**
+     * Obtiene una amistad determinada
+     * @param {String} userId - identificador del usuario
+     * @param {String} friendshipId - identificador de la amistad a aceptar
+     * @returns {Promise<ApiFriendship>} - devuelve la amistad modificada
+     */
+    async getUserFriendShip(userId= localStorage.getItem('user'), friendshipId){
+        const rawResult = await fetch(`http://localhost:3000/api/users/${userId}/friendships/${friendshipId}`, {
+            method: 'GET',
+            headers: {Authorization: localStorage.getItem('token')}
+        })
+
+        const bodyContent = await rawResult.json()
+
+        if(rawResult.status === 200){
+            console.log(`Modificar la amistad de ${userId} con id ${friendshipId}. Resultado -> `, bodyContent)
+            return bodyContent
+        } else {
+            console.error(`Modificar la amistad de ${userId} con id ${friendshipId}. Descripción del error -> `, bodyContent)
+        }
+
+
+    }
+
+
+    /**
+     * Acepta una amistad determinada
+     * @param {String} userId - identificador del usuario
+     * @param {String} friendshipId - identificador de la amistad a aceptar
+     * @returns {Promise<ApiFriendship>} - devuelve la amistad modificada
+     */
+    async accepFriendship(userId= localStorage.getItem('user'), friendshipId){
+        const rawResult = await fetch(`http://localhost:3000/api/users/${userId}/friendships/${friendshipId}`, {
+            method: 'PUT',
+            headers: {Authorization: localStorage.getItem('token')}
+        })
+
+        const bodyContent = await rawResult.json()
+
+        if(rawResult.status === 200){
+            console.log(`Modificar la amistad de ${userId} con id ${friendshipId}. Resultado -> `, bodyContent)
+            return bodyContent
+        } else {
+            console.error(`Modificar la amistad de ${userId} con id ${friendshipId}. Descripción del error -> `, bodyContent)
+        }
     }
 }
