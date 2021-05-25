@@ -233,7 +233,6 @@ export default class API {
 
         const bodyContent = await rawResult.json()
 
-
         let finalContent = /** @type {ApiPageFilms}*/ ({pagination: {hasNext: false, hasPrevious: false}, content: []})
 
         if (rawResult.status === 200) { // salió bien
